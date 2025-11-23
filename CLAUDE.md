@@ -112,6 +112,47 @@ All implementations must:
 - Provide examples and troubleshooting
 - Follow progressive disclosure principle
 
+## 6. Tool Discovery Reference
+
+> **IMPORTANT FOR CLAUDE CODE:** Before using ANY tool, MCP server, skill, or package, consult these manifests:
+
+### Available Tools Documentation
+
+📋 **MCP Servers:** `docs/tools/mcp-servers.md`
+- All installed MCP servers and their tools
+- Parameters, returns, costs for each tool
+- Examples and validation steps
+- **Check this BEFORE calling any `mcp__*` tool**
+
+🎯 **Skills:** `docs/tools/skills.md`
+- All installed Claude Code skills
+- Trigger keywords and use cases
+- Cost breakdown and validation
+- **Check this to understand when skills activate**
+
+📦 **Packages:** `docs/tools/packages.md`
+- Python packages and system tools
+- Purpose and usage for each package
+- Dependencies and installation
+- **Check this for available capabilities**
+
+### When to Consult Manifests
+
+**Before using a tool:**
+1. Read `docs/tools/mcp-servers.md` to understand parameters and costs
+2. Check examples to see proper usage
+3. Verify tool is listed and documented
+
+**Before activating a skill:**
+1. Read `docs/tools/skills.md` to understand triggers
+2. Check cost implications
+3. Review expected output format
+
+**Before installing packages:**
+1. Read `docs/tools/packages.md` to check if already installed
+2. Understand purpose and dependencies
+3. Follow installation guide if adding new package
+
 ---
 
 # Using Perplexity MCP with Claude Code
