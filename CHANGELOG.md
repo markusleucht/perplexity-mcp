@@ -4,12 +4,12 @@
 
 ### 🎯 Lean System Prompting Architecture
 
-**Achievement:** Separated generic system practices from project-specific instructions.
+**Achievement:** Separated generic system practices from project-specific instructions. Agent-only instructions.
 
 **Result:**
 - Global CLAUDE.md: 131 lines (universal development practices)
-- Project CLAUDE.md: 81 lines (67% reduction from 248 → 81 lines)
-- Total reduction from original: 587 → 81 lines (86% reduction!)
+- Project CLAUDE.md: **61 lines** (pure agent instructions)
+- Total reduction from original: **587 → 61 lines (90% reduction!)**
 
 ---
 
@@ -33,7 +33,7 @@
 6. Project Structure
 7. Quick Checklist
 
-#### 2. Project CLAUDE.md Streamlined (81 lines)
+#### 2. Project CLAUDE.md Streamlined (61 lines - Agent Only)
 
 **Removed (now in global):**
 - Lines 1-120: Generic system-level best practices
@@ -42,24 +42,26 @@
 - Documentation structure patterns
 - Quality standards checklists
 
-**Kept (project-specific only):**
+**Removed (not for agent):**
+- User documentation routing section
+- Quick links to guides (users consult README.md)
+
+**Kept (agent instructions only):**
 - Tool Discovery instructions (CRITICAL for Claude Code agent)
 - MCP server tools (`perplexity_search`, `perplexity_social`)
 - pharma-research skill reference
-- Quick routing to user documentation
+- When to consult manifests (tool discovery workflow)
 - Project context (what this project does)
 - Key features and costs
 - Specifications locations
 
 **Structure:**
 ```markdown
-# Perplexity MCP Project
-├── For Claude Code Agent: Tool Discovery (lines 8-38)
+# Perplexity MCP Project (61 lines - Agent Only)
+├── Tool Discovery (lines 8-37)
 │   ├── Available Tools (MCP servers, skills, packages)
 │   └── When to Consult Manifests
-├── For Users: Documentation (lines 40-58)
-│   └── Quick links to guides
-└── Project Context (lines 60-81)
+└── Project Context (lines 41-60)
     ├── What This Project Does
     ├── Key Features
     └── Specifications
@@ -72,8 +74,8 @@
 - **Project** (perplexity/CLAUDE.md): WHAT this project does (tool discovery, routing)
 
 **Token Efficiency:**
-- Project CLAUDE.md: 587 → 248 → 81 lines
-- **Total reduction: 86%** from original bloated version
+- Project CLAUDE.md: 587 → 248 → 61 lines
+- **Total reduction: 90%** from original bloated version
 - System prompt now lean and focused
 
 **Clarity:**
@@ -89,24 +91,26 @@
 ### Validation
 
 - [x] Global CLAUDE.md: 131 lines (target: ~120, acceptable)
-- [x] Project CLAUDE.md: 81 lines (target: ~80-100)
+- [x] Project CLAUDE.md: 61 lines (target: ~60-80, optimal!)
 - [x] No duplication between files
 - [x] Tool discovery preserved (critical for agent)
-- [x] User routing preserved
-- [x] All project-specific content retained
+- [x] User docs removed (agent doesn't need routing)
+- [x] All agent-relevant content retained
 - [x] Generic practices moved to global
+- [x] User docs accessible via README.md
 
 ### Benefits
 
 **For Agent (Claude Code):**
-- 86% token reduction in project-specific system prompt
+- 90% token reduction in project-specific system prompt
 - Clear tool discovery instructions
-- No generic fluff, just actionable project context
+- No generic fluff, no user docs, pure agent context
+- Only sees: tool discovery + project context
 
 **For Users:**
-- Quick routing table to all documentation
-- Clear project context at top
-- No need to parse system-level practices
+- Documentation routing in README.md (not CLAUDE.md)
+- Clear separation: agents read CLAUDE.md, users read README.md
+- No confusion between agent instructions and user docs
 
 **For Maintenance:**
 - Update universal practices once (global file)
