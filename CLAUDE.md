@@ -1,6 +1,124 @@
+# System-Level Best Practices for Claude Code
+
+> **READ THIS FIRST:** These guidelines apply to ALL work in this project, before using any external tools, MCP servers, or skills.
+
+## 1. Specification Management
+
+**Principle: Mirror specifications locally before implementation**
+
+When working with external tools, MCP servers, or skills:
+
+1. **Always fetch and mirror official specifications locally**
+   - Store in `docs/` directory (e.g., `docs/SKILL_SPEC.md`, `docs/MCP_SPEC.md`)
+   - Include version number and date retrieved
+   - Document source URL for future updates
+   - Enables offline validation and audit trail
+
+2. **Validate against specifications**
+   - Create validation scripts when implementing specs (e.g., `validate_skill.py`)
+   - Run validation before committing
+   - Document any deviations from spec with rationale
+
+3. **Keep specifications version-controlled**
+   - Commit spec mirrors to repository
+   - Update when official specs change
+   - Maintain changelog of spec versions used
+
+**Example: SKILL Specification**
+- Mirrored at: `docs/SKILL_SPEC.md`
+- Validation: `~/.claude/skills/*/validate_skill.py`
+- Official source: https://github.com/anthropics/skills
+
+## 2. Progressive Disclosure of Tool Capabilities
+
+**Principle: Document tool capabilities incrementally as they're discovered**
+
+When new tools (MCP servers, skills, packages) are installed:
+
+1. **Create capability manifests in `docs/tools/`**
+   ```
+   docs/tools/
+   ├── mcp-servers.md          # Available MCP servers & their tools
+   ├── skills.md               # Installed skills & their triggers
+   └── packages.md             # Python/system packages & their purpose
+   ```
+
+2. **Document each tool with:**
+   - **What it does** (core functionality)
+   - **When to use it** (triggers, use cases)
+   - **How to use it** (parameters, examples)
+   - **Limitations** (known constraints, costs)
+   - **Dependencies** (what it requires)
+
+3. **Update manifests incrementally**
+   - Add entries when tools are installed
+   - Update when capabilities change
+   - Remove when tools are deprecated
+   - Version control all changes
+
+4. **Cross-reference from main CLAUDE.md**
+   - Keep CLAUDE.md high-level
+   - Link to detailed docs in `docs/tools/`
+   - Follow progressive disclosure: overview → details → reference
+
+## 3. Best Practice Adherence
+
+**Before implementing ANY tool or skill:**
+
+✅ Check if official specification exists
+✅ Mirror specification locally to `docs/`
+✅ Create validation mechanism (script, checklist, CI check)
+✅ Document tool capabilities in `docs/tools/`
+✅ Update main CLAUDE.md with high-level overview
+✅ Add examples and troubleshooting
+✅ Version control everything
+
+**Example workflow:**
+1. Install MCP server → Fetch MCP protocol spec → Mirror to `docs/MCP_SPEC.md`
+2. Configure tools → Document in `docs/tools/mcp-servers.md`
+3. Test functionality → Add examples to CLAUDE.md
+4. Validate compliance → Run validation script
+5. Commit with comprehensive documentation
+
+## 4. Documentation Structure
+
+```
+project/
+├── CLAUDE.md                    # High-level guide (you are here)
+├── docs/
+│   ├── SKILL_SPEC.md           # Mirrored specifications
+│   ├── MCP_SPEC.md
+│   ├── tools/                   # Progressive disclosure docs
+│   │   ├── mcp-servers.md      # All MCP servers & their tools
+│   │   ├── skills.md           # All skills & their triggers
+│   │   └── packages.md         # All packages & their purpose
+│   ├── QUICKSTART.md           # Quick start guide
+│   └── [other docs]
+├── .claude/
+│   └── skills/                  # Skill implementations
+│       └── skill-name/
+│           ├── SKILL.md        # Core definition (minimal)
+│           ├── references/     # Detailed docs
+│           └── validate_*.py   # Validation scripts
+└── src/                         # Source code
+```
+
+## 5. Quality Standards
+
+All implementations must:
+- Include validation against official specs
+- Document tool capabilities progressively
+- Maintain version control of specifications
+- Provide examples and troubleshooting
+- Follow progressive disclosure principle
+
+---
+
 # Using Perplexity MCP with Claude Code
 
 **Quick reference for integrating Perplexity searches directly into Claude Code.**
+
+**Specification compliance:** See `docs/SKILL_SPEC.md` for SKILL spec, validated via `validate_skill.py`
 
 ---
 
