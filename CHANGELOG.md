@@ -1,5 +1,120 @@
 # Changelog
 
+## 2025-11-23e - Clean Separation: Global vs Project CLAUDE.md
+
+### 🎯 Lean System Prompting Architecture
+
+**Achievement:** Separated generic system practices from project-specific instructions.
+
+**Result:**
+- Global CLAUDE.md: 131 lines (universal development practices)
+- Project CLAUDE.md: 81 lines (67% reduction from 248 → 81 lines)
+- Total reduction from original: 587 → 81 lines (86% reduction!)
+
+---
+
+### What Was Accomplished
+
+#### 1. Global CLAUDE.md Enhancements (~/.claude/CLAUDE.md)
+
+**Added to global file (universal practices):**
+- Section 4: Specification Compliance (mirror specs locally)
+- Section 5: Progressive Disclosure (tool manifests, documentation structure)
+- Section 6: Project Structure (enhanced with docs organization)
+
+**Purpose:** System-level practices that apply to ALL projects
+
+**Content:**
+1. Test Before Document
+2. Validate Integration Points
+3. Build Incrementally
+4. Specification Compliance (NEW)
+5. Progressive Disclosure (NEW)
+6. Project Structure
+7. Quick Checklist
+
+#### 2. Project CLAUDE.md Streamlined (81 lines)
+
+**Removed (now in global):**
+- Lines 1-120: Generic system-level best practices
+- Specification management details
+- Progressive disclosure principles
+- Documentation structure patterns
+- Quality standards checklists
+
+**Kept (project-specific only):**
+- Tool Discovery instructions (CRITICAL for Claude Code agent)
+- MCP server tools (`perplexity_search`, `perplexity_social`)
+- pharma-research skill reference
+- Quick routing to user documentation
+- Project context (what this project does)
+- Key features and costs
+- Specifications locations
+
+**Structure:**
+```markdown
+# Perplexity MCP Project
+├── For Claude Code Agent: Tool Discovery (lines 8-38)
+│   ├── Available Tools (MCP servers, skills, packages)
+│   └── When to Consult Manifests
+├── For Users: Documentation (lines 40-58)
+│   └── Quick links to guides
+└── Project Context (lines 60-81)
+    ├── What This Project Does
+    ├── Key Features
+    └── Specifications
+```
+
+### Key Improvements
+
+**Separation of Concerns:**
+- **Global** (~/.claude/CLAUDE.md): HOW to work (development practices)
+- **Project** (perplexity/CLAUDE.md): WHAT this project does (tool discovery, routing)
+
+**Token Efficiency:**
+- Project CLAUDE.md: 587 → 248 → 81 lines
+- **Total reduction: 86%** from original bloated version
+- System prompt now lean and focused
+
+**Clarity:**
+- Global file applies to all projects (Skills, MCP servers, etc.)
+- Project file is pure agent instructions + user routing
+- No duplication between files
+
+**Maintainability:**
+- Update universal practices → edit global CLAUDE.md once
+- Update project specifics → edit project CLAUDE.md
+- Clear ownership of each section
+
+### Validation
+
+- [x] Global CLAUDE.md: 131 lines (target: ~120, acceptable)
+- [x] Project CLAUDE.md: 81 lines (target: ~80-100)
+- [x] No duplication between files
+- [x] Tool discovery preserved (critical for agent)
+- [x] User routing preserved
+- [x] All project-specific content retained
+- [x] Generic practices moved to global
+
+### Benefits
+
+**For Agent (Claude Code):**
+- 86% token reduction in project-specific system prompt
+- Clear tool discovery instructions
+- No generic fluff, just actionable project context
+
+**For Users:**
+- Quick routing table to all documentation
+- Clear project context at top
+- No need to parse system-level practices
+
+**For Maintenance:**
+- Update universal practices once (global file)
+- Update project specifics in project file only
+- No risk of divergence between projects
+
+---
+
 ## 2025-11-23d - Progressive Disclosure Restructuring
 
 ### 🎯 Major Documentation Architecture Overhaul
