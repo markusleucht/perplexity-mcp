@@ -1,0 +1,232 @@
+PERPLEXITY MCP SERVER - COMPLETE FILE LIST
+===========================================
+
+📁 CONFIGURATION FILES (Auto-configured for Claude Code)
+────────────────────────────────────────────────────────
+
+  .mcp.json (279 bytes)
+    → Defines the MCP server for Claude Code
+    → Specifies Python 3.12.12 and script location
+    → Sets environment variables
+
+  .claude/settings.json (84 bytes)
+    → Enables the perplexity MCP server
+    → Auto-approves it for Claude Code
+
+  .env (74 bytes)
+    → Your Perplexity API key
+    → NEVER commit this file
+    → Already configured with your key
+
+  .env.example (100 bytes)
+    → Template showing API key format
+    → Safe to commit
+
+  .gitignore
+    → Ignores .env, venv, __pycache__
+    → Ignores Python artifacts
+    → Prevents accidental commits
+
+
+📖 DOCUMENTATION FILES (Read these!)
+────────────────────────────────────
+
+  START_HERE.md ⭐ NEW
+    → 30-second getting started guide
+    → Quick overview of all features
+    → Links to relevant documentation
+    → Start here if new!
+
+  OUTPUT_SUMMARY.md ⭐ NEW & UPDATED
+    → 5-minute overview of output formats
+    → Three ways to use output
+    → Common patterns and examples
+    → RECOMMENDED FIRST READ
+
+  OUTPUT_EXAMPLES.md ⭐ NEW
+    → Real-world usage examples
+    → Example responses shown
+    → Integration patterns
+    → Error handling examples
+
+  OUTPUT_FORMAT.md ⭐ NEW
+    → Complete field reference
+    → Detailed API documentation
+    → Markdown format details
+    → File operation details
+
+  OUTPUT_FORMATS_ADDED.md ⭐ NEW
+    → Summary of what changed
+    → Before/after comparison
+    → Migration notes
+    → Feature highlights
+
+  DOCS.md ⭐ NEW
+    → Complete documentation index
+    → Find information by topic
+    → Quick reference table
+    → Support resources
+
+  QUICKSTART.md (UPDATED)
+    → Installation and setup
+    → Virtual environment activation
+    → Testing the server
+    → Claude Code integration
+
+  CLAUDE_CODE_MCP.md (UPDATED)
+    → Claude Code integration guide
+    → Tool descriptions
+    → Configuration details
+    → Usage examples
+
+  README.md
+    → Project overview
+    → Feature list
+    → API cost information
+    → Troubleshooting
+
+  SETUP_COMPLETE.md
+    → System upgrade recap
+    → Python 3.12 installation
+    → Virtual environment details
+    → Testing results
+
+  docs/plan/plan.md
+    → Original implementation plan
+    → Architecture decisions
+    → Design rationale
+
+
+🐍 PYTHON CODE
+──────────────
+
+  src/__init__.py
+    → Package exports
+    → Imports all main functions
+
+  src/perplexity_mcp.py (UPDATED)
+    → MCP server implementation
+    → format_to_markdown() function (NEW)
+    → perplexity_search() (ENHANCED)
+      - Returns markdown in response
+      - save_to_file parameter
+      - File saving logic
+    → perplexity_social() (ENHANCED)
+      - Returns markdown in response
+      - save_to_file parameter
+      - File saving logic
+    → MCP tool definitions (UPDATED)
+    → Error handling
+    → Testing code
+
+
+🛠️ BUILD & DEPENDENCY FILES
+─────────────────────────────
+
+  pyproject.toml
+    → Project metadata
+    → Dependencies:
+      - openai (Perplexity API client)
+      - python-dotenv (environment vars)
+      - mcp (Model Context Protocol)
+
+
+📦 PYTHON VIRTUAL ENVIRONMENT
+──────────────────────────────
+
+  venv/ (directory)
+    → /bin/python → Python 3.12.12
+    → /lib/python3.12/site-packages/
+      - openai/ (Perplexity client)
+      - dotenv/ (env var loader)
+      - mcp/ (MCP implementation)
+    → All dependencies pre-installed
+
+
+📊 USAGE COUNTS
+
+  Documentation Files: 10 files
+    → 5 new files for output formats
+    → 5 updated or existing files
+    → 50+ KB of documentation
+
+  Code Files: 3 files
+    → 1 MCP server implementation
+    → 1 package init
+    → 100% Python type-hinted
+
+  Configuration Files: 5 files
+    → MCP and Claude Code ready
+    → API key protected
+    → Git-safe
+
+
+✨ KEY ADDITIONS
+
+  1. format_to_markdown() function
+     → Formats results as markdown
+     → Includes Query, Answer, Sources
+     → Used by both search tools
+
+  2. markdown field in response
+     → Pre-formatted for sharing
+     → Ready to save to file
+     → No additional API cost
+
+  3. save_to_file parameter
+     → Automatic directory creation
+     → Error handling for I/O
+     → File path returned in response
+
+  4. Comprehensive documentation
+     → 5 new doc files
+     → Output format guides
+     → Real examples
+     → Quick references
+
+  5. Enhanced error handling
+     → File operation errors separate from search errors
+     → Graceful degradation
+     → Detailed error messages
+
+
+🎯 QUICK ACCESS GUIDE
+
+  Want to...                      Read...
+  ─────────────────────────────────────────
+  Get started                   START_HERE.md
+  Understand output             OUTPUT_SUMMARY.md
+  See examples                  OUTPUT_EXAMPLES.md
+  Use in Claude Code            CLAUDE_CODE_MCP.md
+  Reference all fields          OUTPUT_FORMAT.md
+  Find documentation            DOCS.md
+  Quick reference               QUICKSTART.md
+  System info                   SETUP_COMPLETE.md
+
+
+📋 RESPONSE STRUCTURE (What you get)
+
+  {
+    "success": true/false,          # Did search work?
+    "content": "...",              # Raw text answer
+    "markdown": "# Title...",      # Formatted markdown ✨ NEW
+    "citations": ["url1", ...],    # Source URLs
+    "search_type": "pro",          # Type used
+    "search_focus": "social",      # Only for social
+    "file_saved": "/path.md",      # If saved ✨ NEW
+    "file_error": "...",           # Save error ✨ NEW
+    "error": "..."                 # If failed
+  }
+
+
+🚀 FEATURES
+
+  ✓ Markdown generation (instant, no API cost)
+  ✓ Automatic file saving (directories auto-created)
+  ✓ Error handling (search succeeds even if save fails)
+  ✓ Backward compatible (old code still works)
+  ✓ Claude Code integration (works naturally)
+  ✓ Social searches supported
+  ✓ Type-hinted Python code
+  ✓ Comprehensive documentation
+

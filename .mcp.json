@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "perplexity": {
+      "command": "/opt/homebrew/bin/python3.11",
+      "args": ["/Users/markus/perplexity/src/perplexity_mcp_server.py"],
+      "env": {
+        "PYTHONPATH": "/Users/markus/perplexity",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    }
+  }
+}
