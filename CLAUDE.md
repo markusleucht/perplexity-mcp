@@ -5,7 +5,7 @@
 
 ---
 
-## For Claude Code Agent: Tool Discovery
+## Tool Discovery
 
 > **CRITICAL:** Before using ANY tool in this project, consult the tool manifests below.
 
@@ -38,26 +38,6 @@
 
 ---
 
-## For Users: Documentation
-
-### 🚀 Getting Started
-→ [Quick Setup](QUICKSTART.md) - 2 minutes
-→ [Complete Guide](docs/guides/QUICKSTART.md) - 5 minutes
-
-### 📖 Usage
-→ [User Guide](docs/guides/USER_GUIDE.md) - Examples, tips, output format
-→ [Pharma Research](docs/guides/PHARMA_RESEARCH.md) - German market analysis skill
-
-### 🔧 Technical
-→ [Developer Guide](docs/guides/DEVELOPER_GUIDE.md) - API reference, parameters, costs
-→ [Troubleshooting](docs/guides/TROUBLESHOOTING.md) - Common issues
-
-### 📚 More
-→ [Installation](INSTALL.md) - Detailed setup
-→ [Changelog](CHANGELOG.md) - All changes
-
----
-
 ## Project Context
 
 **What This Project Does:**
@@ -78,4 +58,4 @@
 
 ---
 
-**Architecture:** This project follows progressive disclosure. Agent instructions above, user docs in `docs/guides/`, tool manifests in `docs/tools/`, specs in `docs/specs/`.
+**Documentation for users:** See `README.md` for user-facing documentation and quick start guides.
