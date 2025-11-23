@@ -1,8 +1,0 @@
-# Ignore all generated reports
-*.md
-
-# Keep this .gitignore
-!.gitignore
-
-# Optional: Keep README
-!README.md

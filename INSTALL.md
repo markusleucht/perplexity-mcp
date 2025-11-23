@@ -139,4 +139,4 @@ The tool will automatically:
 - Return a markdown report with sources
 - Save to file if requested
 
-See `CLAUDE.md` for detailed usage examples.
+See [`docs/guides/USER_GUIDE.md`](docs/guides/USER_GUIDE.md) for detailed usage examples and [`docs/guides/TROUBLESHOOTING.md`](docs/guides/TROUBLESHOOTING.md) for common issues.

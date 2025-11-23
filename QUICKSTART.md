@@ -97,8 +97,10 @@ Search for quantum computing papers in scholar sources
 
 ## Next Steps
 
-- **Detailed Usage**: See [CLAUDE.md](CLAUDE.md)
-- **Troubleshooting**: See [INSTALL.md](INSTALL.md)
+- **Complete Guide**: See [docs/guides/QUICKSTART.md](docs/guides/QUICKSTART.md)
+- **Usage Examples**: See [docs/guides/USER_GUIDE.md](docs/guides/USER_GUIDE.md)
+- **Technical Reference**: See [docs/guides/DEVELOPER_GUIDE.md](docs/guides/DEVELOPER_GUIDE.md)
+- **Troubleshooting**: See [docs/guides/TROUBLESHOOTING.md](docs/guides/TROUBLESHOOTING.md) or [INSTALL.md](INSTALL.md)
 - **Project Overview**: See [README.md](README.md)
 
 ---

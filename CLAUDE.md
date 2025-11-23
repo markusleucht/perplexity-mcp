@@ -9,7 +9,7 @@
 When working with external tools, MCP servers, or skills:
 
 1. **Always fetch and mirror official specifications locally**
-   - Store in `docs/` directory (e.g., `docs/SKILL_SPEC.md`, `docs/MCP_SPEC.md`)
+   - Store in `docs/specs/` directory (e.g., `docs/specs/SKILL_SPEC.md`, `docs/specs/MCP_SPEC.md`)
    - Include version number and date retrieved
    - Document source URL for future updates
    - Enables offline validation and audit trail
@@ -25,7 +25,7 @@ When working with external tools, MCP servers, or skills:
    - Maintain changelog of spec versions used
 
 **Example: SKILL Specification**
-- Mirrored at: `docs/SKILL_SPEC.md`
+- Mirrored at: `docs/specs/SKILL_SPEC.md`
 - Validation: `~/.claude/skills/*/validate_skill.py`
 - Official source: https://github.com/anthropics/skills
 
@@ -58,7 +58,7 @@ When new tools (MCP servers, skills, packages) are installed:
 
 4. **Cross-reference from main CLAUDE.md**
    - Keep CLAUDE.md high-level
-   - Link to detailed docs in `docs/tools/`
+   - Link to detailed docs in `docs/tools/` and `docs/guides/`
    - Follow progressive disclosure: overview → details → reference
 
 ## 3. Best Practice Adherence
@@ -66,17 +66,17 @@ When new tools (MCP servers, skills, packages) are installed:
 **Before implementing ANY tool or skill:**
 
 ✅ Check if official specification exists
-✅ Mirror specification locally to `docs/`
+✅ Mirror specification locally to `docs/specs/`
 ✅ Create validation mechanism (script, checklist, CI check)
 ✅ Document tool capabilities in `docs/tools/`
 ✅ Update main CLAUDE.md with high-level overview
-✅ Add examples and troubleshooting
+✅ Add examples and troubleshooting to appropriate guide
 ✅ Version control everything
 
 **Example workflow:**
-1. Install MCP server → Fetch MCP protocol spec → Mirror to `docs/MCP_SPEC.md`
+1. Install MCP server → Fetch MCP protocol spec → Mirror to `docs/specs/MCP_SPEC.md`
 2. Configure tools → Document in `docs/tools/mcp-servers.md`
-3. Test functionality → Add examples to CLAUDE.md
+3. Test functionality → Add examples to `docs/guides/`
 4. Validate compliance → Run validation script
 5. Commit with comprehensive documentation
 
@@ -84,22 +84,29 @@ When new tools (MCP servers, skills, packages) are installed:
 
 ```
 project/
-├── CLAUDE.md                    # High-level guide (you are here)
+├── CLAUDE.md                    # High-level guide + routing (you are here)
 ├── docs/
-│   ├── SKILL_SPEC.md           # Mirrored specifications
-│   ├── MCP_SPEC.md
+│   ├── guides/                  # User-facing guides
+│   │   ├── QUICKSTART.md        # Getting started
+│   │   ├── USER_GUIDE.md        # End user reference
+│   │   ├── DEVELOPER_GUIDE.md   # Technical reference
+│   │   ├── PHARMA_RESEARCH.md   # Specialized use case
+│   │   └── TROUBLESHOOTING.md   # Common issues
+│   ├── specs/                   # Mirrored specifications
+│   │   ├── SKILL_SPEC.md        # SKILL specification
+│   │   └── mcp_research.md      # MCP research notes
 │   ├── tools/                   # Progressive disclosure docs
-│   │   ├── mcp-servers.md      # All MCP servers & their tools
-│   │   ├── skills.md           # All skills & their triggers
-│   │   └── packages.md         # All packages & their purpose
-│   ├── QUICKSTART.md           # Quick start guide
-│   └── [other docs]
+│   │   ├── mcp-servers.md       # All MCP servers & their tools
+│   │   ├── skills.md            # All skills & their triggers
+│   │   └── packages.md          # All packages & their purpose
+│   ├── reports/                 # Generated reports & analyses
+│   └── archive/                 # Old documentation
 ├── .claude/
 │   └── skills/                  # Skill implementations
 │       └── skill-name/
-│           ├── SKILL.md        # Core definition (minimal)
-│           ├── references/     # Detailed docs
-│           └── validate_*.py   # Validation scripts
+│           ├── SKILL.md         # Core definition (minimal)
+│           ├── references/      # Detailed docs
+│           └── validate_*.py    # Validation scripts
 └── src/                         # Source code
 ```
 
@@ -155,432 +162,87 @@ All implementations must:
 
 ---
 
-# Using Perplexity MCP with Claude Code
+# Quick Reference: Perplexity MCP Documentation
 
-**Quick reference for integrating Perplexity searches directly into Claude Code.**
+**This project uses progressive disclosure.** Consult the relevant guide based on your needs:
 
-**Specification compliance:** See `docs/SKILL_SPEC.md` for SKILL spec, validated via `validate_skill.py`
+## 🚀 Getting Started
 
----
+**New to Perplexity MCP?**
+→ See: [`docs/guides/QUICKSTART.md`](docs/guides/QUICKSTART.md)
+→ Time: 5 minutes to first search
 
-## What This Tool Does
+## 📖 User Guide
 
-With this MCP server, you can ask Claude Code to:
-- Search Perplexity AI Pro Search (deep research with web crawling)
-- Search social media and expert forums
-- Get German-language reports
-- Save results as markdown files
-- **NEW:** Built-in research guidelines for precise, data-driven answers
-- **NEW:** Automated German pharmaceutical market research via `pharma-research` skill
+**Using Perplexity MCP with Claude Code?**
+→ See: [`docs/guides/USER_GUIDE.md`](docs/guides/USER_GUIDE.md)
+→ Covers: Examples, tips, output format, integration patterns
 
-Everything happens through natural language - just ask!
+## 🔧 Developer Guide
 
-### Research Quality Guidelines
+**Building or extending the MCP server?**
+→ See: [`docs/guides/DEVELOPER_GUIDE.md`](docs/guides/DEVELOPER_GUIDE.md)
+→ Covers: API reference, parameters, costs, project structure
 
-Every search is automatically guided by these principles:
-- **Specific data with years** (no generic statements)
-- **Context**: changes over time + benchmarks
-- **Transparent**: clearly states when data is unavailable
-- **Structured**: Key facts → Data points → Interpretation → Sources
+## 💊 Pharma Research
 
----
+**German pharmaceutical market research?**
+→ See: [`docs/guides/PHARMA_RESEARCH.md`](docs/guides/PHARMA_RESEARCH.md)
+→ Covers: pharma-research skill v2.0.0, usage, examples, costs
 
-## Quick Start
+## ⚠️ Troubleshooting
 
-### 1. First-Time Setup (One Command)
-
-If this is your first time using the tool, run:
-
-```bash
-chmod +x setup.sh && ./setup.sh
-```
-
-This automatically installs dependencies and configures everything. Then restart Claude Code.
-
-**Already set up?** Skip to step 2.
-
-### 2. Basic Searches in Claude Code
-
-```
-Search for "quantum computing trends in 2025"
-```
-
-Claude Code will call the tool and return a markdown report with sources.
+**Encountering issues?**
+→ See: [`docs/guides/TROUBLESHOOTING.md`](docs/guides/TROUBLESHOOTING.md)
+→ Covers: Common errors, API key issues, installation problems
 
 ---
 
-## Natural Language Examples
-
-### Pro Search (Deep Research)
-```
-Search for the latest AI developments in 2025
-```
-→ Performs deep research with web crawling, returns comprehensive report with 15-20 sources
-
-### Social Media Focus
-```
-Search social media for what people are discussing about AI safety
-```
-→ Searches Twitter, Reddit, forums, expert discussions
-
-### German Language
-```
-Search für Entwicklungen in der Medizin 2025
-```
-→ Returns German-language report (query language detected)
-
-### Save to File
-```
-Search for machine learning trends and save to trends.md
-```
-→ Creates `reports/trends.md` with complete report (automatically saved to `reports/` folder)
-
-### Language Selection
-```
-Search for renewable energy trends in Spanish
-```
-→ Returns Spanish-language response
-
----
-
-## What You Get Back
-
-### Markdown Report
-```
-[Content section with analysis]
-
-## Quellen
-
-1. https://example.com/source1
-2. https://example.com/source2
-...
-
----
-
-*Recherchiert: 22. November 2025*
-*Methode: Perplexity Pro Search auf Web-Quellen (sonar-pro)*
-*Anfrage: Your query here*
-```
-
-### Features
-- ✅ Professional report format
-- ✅ Actual source URLs (not hallucinated)
-- ✅ Current date included
-- ✅ Method metadata
-- ✅ Ready to share/publish
-
----
-
-## Tool Parameters (If You Need Control)
-
-If you want to be explicit about parameters:
-
-| Parameter | Values | Default | Example |
-|-----------|--------|---------|---------|
-| `query` | Any text | Required | "AI trends 2025" |
-| `search_type` | pro, auto, fast | pro | "fast" |
-| `sources` | web, social, scholar | web | "social" |
-| `language` | en, de, es, fr, it | en | "de" |
-| `max_tokens` | 100-4000 | 1024 | 2000 |
-| `save_to_file` | Path/filename | None | "report.md" |
-
-### Example with Parameters
-```
-Pro Search: "What are the latest cancer treatments?"
-German language, save as "Krebsbehandlung_2025.md"
-```
-
----
-
-## Real-World Queries
-
-### Research Papers
-```
-Search for recent breakthroughs in quantum computing using scholar sources
-```
-
-### Industry Trends
-```
-Find the top emerging trends in healthcare technology for 2025
-```
-
-### News & Discussion
-```
-What are people discussing about cryptocurrency regulations?
-```
-
-### Competitive Analysis
-```
-Search for what competitors are doing with AI implementation
-```
-
-### Market Research
-```
-Find consumer trends in sustainable fashion for 2025
-```
-
----
-
-## File Locations
-
-```
-/Users/markus/perplexity/
-├── .env                    # Your API key (never commit)
-├── .mcp.json              # MCP server config (already set up)
-├── README.md              # Project overview
-├── src/
-│   └── perplexity_mcp.py  # The actual tool code
-├── docs/
-│   ├── QUICKSTART.md
-│   ├── SESSION_SUMMARY.md # Latest changes
-│   └── ... (other docs)
-└── reports/               # All generated reports (auto-created)
-    ├── Dermatologen_Deutschland_2025.md
-    ├── Psoriasis_Therapien_2025.md
-    └── ... (your search results)
-```
-
----
-
-## Understanding the Output
-
-### Citation Numbers
-Content includes numbers like `[1][2][3]` - these correspond to the sources list below.
-
-### Sources Section
-All sources are **real URLs** extracted from Perplexity's search results. They are NOT hallucinated by the AI.
-
-### Metadata Footer
-- **Recherchiert:** Date the search was performed
-- **Methode:** Which Perplexity model and source type was used
-- **Anfrage:** The exact query that was searched
-
----
-
-## API Costs
-
-- **Pro Search:** ~$0.01-0.02 per query
-- **Social Search:** ~$0.01-0.02 per query
-- **Your Budget:** $5 in credits
-- **Expected Usage:** 100-250 searches before credits depleted
-
-Monitor at: https://www.perplexity.ai/settings/api
-
----
-
-## Tips & Tricks
-
-### Get Better Results
-- Be specific about what you want
-- Include year/timeframe if relevant ("2025", "recent")
-- Mention the audience/context
-
-### Handling Large Topics
-- Use `search_type="pro"` for deep research (default)
-- Use `search_type="auto"` for balanced search
-- Use `search_type="fast"` for quick results
-
-### Language Support
-The tool auto-detects language, but you can be explicit:
-- German: "auf Deutsch"
-- Spanish: "en español"
-- French: "en français"
-
-### Save for Later
-Always use `save_to_file` parameter to keep reports:
-```
-Search for "topic" and save as "my_report.md"
-```
-
----
-
-## Troubleshooting
-
-### "API key not found"
-Check that `.env` file exists with `PERPLEXITY_API_KEY=pplx-...`
-
-### No results returned
-- Try different search query
-- Check API credits: https://www.perplexity.ai/settings/api
-- Try `search_type="auto"` instead of "pro"
-
-### Not getting sources
-Sources come from Perplexity's search results. If none appear, the search may not have found relevant sources.
-
----
-
-## Integration Examples
-
-### Example 1: Quick Market Research
-```
-User: "Search for upcoming AI regulations in Europe for 2025"
-Claude Code: Performs search, returns 15-page report with 20 sources
-User: Reads report, gets sources, makes decisions
-```
-
-### Example 2: Competitive Intelligence
-```
-User: "Find what major tech companies are saying about AI safety"
-Claude Code: Searches social media, returns discussion summary with sources
-```
-
-### Example 3: Documentation
-```
-User: "Research Python async programming best practices and save as guide.md"
-Claude Code: Creates guide.md with professional report format
-```
-
----
-
-## Next Steps
-
-1. **Try a simple search** in Claude Code
-2. **Review the generated report** in the IDE
-3. **Check the sources** - they're all real and verifiable
-4. **Customize for your needs** - change language, source type, etc.
-
----
-
-## For Developers
-
-The MCP tools are defined in `src/perplexity_mcp.py`:
-
-```python
-def perplexity_search(
-    query: str,
-    search_type: str = "pro",
-    max_tokens: int = 1024,
-    sources: list = None,
-    language: str = "en",
-    save_to_file: str = None,
-) -> Dict[str, Any]
-
-def perplexity_social(
-    query: str,
-    max_tokens: int = 1024,
-    save_to_file: str = None,
-) -> Dict[str, Any]
-```
-
-Both return:
-```python
-{
-    "success": True/False,
-    "content": "Text answer",
-    "markdown": "Formatted report",
-    "citations": ["url1", "url2", ...],
-    "file_saved": "path/to/file.md",  # if requested
-    "error": "Error message"  # if failed
-}
-```
-
----
-
-## Pharma-Research Skill (Production-Ready - v2.0.0)
-
-For German pharmaceutical market research with company portfolio context, a specialized Claude Code skill is available:
-
-### What It Does
-
-Automatically conducts structured business analysis of German pharma markets with strategic portfolio context:
-- **Indication Analysis:** Epidemiology, unmet needs, care pathways, market access
-- **Medication Analysis:** Competition, differentiation, pricing, adoption barriers, opportunities
-- **Company Portfolio Analysis:** Corporate financials, portfolio composition, strategic product positioning **(NEW in v2.0.0)**
-- **Marketing Investment Scoring:** 1-5 star priority rating with budget recommendations **(NEW in v2.0.0)**
-- **Negotiation Context:** Leverage assessment, partnership potential, budget tier guidance **(NEW in v2.0.0)**
-- **Quality:** Data-driven reports with 20-30 sources, specific numbers with years
-- **Production-Validated:** Successfully tested with real-world analysis (Psoriasis, Bimekizumab & UCB Pharma)
-
-### Usage
-
-Just ask naturally:
-```
-"Analyze the German pharmaceutical market for Psoriasis and Bimekizumab"
-"Analyze Psoriasis, Bimekizumab, and UCB Pharma's portfolio position"
-"What role does Ozempic play in Novo Nordisk's portfolio strategy?"
-"Research Diabetes Type 2 and Ozempic in Germany"
-```
-
-The skill automatically:
-1. Extracts indication, medication, and company parameters (auto-detects if not specified)
-2. Performs 6-10 targeted Perplexity searches (German + English)
-   - Phase 1: Indication epidemiology
-   - Phase 2: Company financials and portfolio
-   - Phase 3: Medication market position
-   - Phase 4: Strategic positioning and peak sales
-3. Calculates marketing investment priority score (1-5 stars)
-4. Synthesizes findings into structured business report with budget recommendations
-5. Delivers 5-7 page report with 20-30 sources
-6. Saves report to `reports/` folder
-
-### Real-World Example
-
-**Query:** "Analyze the German pharmaceutical market for Psoriasis, Bimekizumab, and UCB Pharma"
-
-**Result (v2.0.0):**
-- 5-7 page comprehensive business report with 3 major sections
-- **Indication:** 2.2M patients, 2-3% prevalence, biologics adoption 35%
-- **Medication:** Dual IL-17A/F inhibitor, PASI 90: 84-93%, market share 5-8%
-- **Company:** UCB 6.15 Mrd. EUR revenue, 29% R&D ratio, portfolio transformation
-- **Portfolio Position:** Bimzelx 799 Mio. EUR (H1 2025), peak sales >4 Mrd. EUR target, 26% revenue share
-- **Strategic Role:** Growth Driver compensating Cimzia patent loss, mission-critical
-- **Investment Priority:** ⭐⭐⭐⭐⭐ (5/5) - Blockbuster launch
-- **Budget Recommendation:** Premium tier, high negotiation leverage, long-term partnership potential
-- 25-30 authoritative sources (RKI, G-BA, UCB investor reports, Fierce Pharma)
-- Cost: ~$0.08 (8 searches @ "auto" mode)
-
-### Installation
-
-**Already installed** in your user-level skills directory (`~/.claude/skills/pharma-research/`).
-
-**To use on another machine:**
-```bash
-git clone https://github.com/markusleucht/claude-code-skills.git
-cp -r claude-code-skills/pharma-research ~/.claude/skills/
-# Restart Claude Code
-```
-
-**Requirements:**
-- Claude Code
-- Perplexity MCP server configured (this project)
+## Additional Resources
+
+### Installation & Setup
+→ [`INSTALL.md`](INSTALL.md) - Detailed installation instructions
+→ [`README.md`](README.md) - Project overview
 
 ### Documentation
+→ [`CHANGELOG.md`](CHANGELOG.md) - All changes and updates
 
-- **Skill README:** `~/.claude/skills/pharma-research/README.md` (complete setup & usage guide)
-- **Skill Definition:** `~/.claude/skills/pharma-research/SKILL.md` (research framework)
-- **Query Strategies:** `~/.claude/skills/pharma-research/references/query-strategies.md`
-- **Example Report:** `~/.claude/skills/pharma-research/examples/Psoriasis_Bimzelx_UCB_Example.md` **(NEW in v2.0.0)**
-- **GitHub Repository:** https://github.com/markusleucht/claude-code-skills
-
-### Cost per Report
-
-- **Typical analysis with company context:** 6-10 Perplexity searches @ "auto" mode
-- **Cost:** ~$0.06-0.10 per comprehensive report (was $0.03-0.045 in v1.0.0)
-- **Cost breakdown:**
-  - Indication analysis: 2-3 searches (~$0.02)
-  - Company/portfolio analysis: 3-4 searches (~$0.03-0.04) **[NEW]**
-  - Medication analysis: 2-3 searches (~$0.02)
-- **Your $5 budget:** ~50-80 detailed pharma market reports with portfolio context
+### Specifications
+→ [`docs/specs/SKILL_SPEC.md`](docs/specs/SKILL_SPEC.md) - SKILL specification
+→ [`docs/specs/mcp_research.md`](docs/specs/mcp_research.md) - MCP research notes
 
 ---
 
-## Resources
+**Documentation Architecture:** This project follows progressive disclosure principles. Start with high-level guides above, then drill down to tool manifests (`docs/tools/`) and specifications (`docs/specs/`) as needed.
 
-### Perplexity MCP Documentation
-- **Quick Start:** `docs/QUICKSTART.md`
-- **All Changes:** `docs/SESSION_SUMMARY.md`
-- **Output Details:** `docs/OUTPUT_FORMAT.md`
-- **Examples:** `docs/OUTPUT_EXAMPLES.md`
-- **Setup Notes:** `docs/SETUP_COMPLETE.md`
+<!-- RESTRUCTURED 2025-11-23: Progressive Disclosure Implementation
+Previous version (587 lines) archived at: docs/archive/CLAUDE.md.pre-restructure-2025-11-23
 
-### Skill Documentation
-- **Implementation Plan:** `docs/plan.md`
-- **Setup Complete:** `docs/SKILL_SETUP_COMPLETE.md`
-- **GitHub Portability:** `docs/GITHUB_PORTABILITY.md`
+MOVED SECTIONS:
+- What This Tool Does → docs/guides/QUICKSTART.md
+- Quick Start → docs/guides/QUICKSTART.md
+- Natural Language Examples → docs/guides/QUICKSTART.md
+- What You Get Back → docs/guides/USER_GUIDE.md
+- Tool Parameters → docs/guides/DEVELOPER_GUIDE.md
+- Real-World Queries → docs/guides/USER_GUIDE.md
+- File Locations → docs/guides/DEVELOPER_GUIDE.md
+- Understanding the Output → docs/guides/USER_GUIDE.md
+- API Costs → docs/guides/DEVELOPER_GUIDE.md
+- Tips & Tricks → docs/guides/USER_GUIDE.md
+- Troubleshooting → docs/guides/TROUBLESHOOTING.md
+- Integration Examples → docs/guides/USER_GUIDE.md
+- Next Steps → docs/guides/QUICKSTART.md
+- For Developers → docs/guides/DEVELOPER_GUIDE.md
+- Pharma-Research Skill → docs/guides/PHARMA_RESEARCH.md
+- Resources → Distributed across guides
 
-### Changelog
-- **All Changes:** `CHANGELOG.md`
+Benefits of restructuring:
+- 71% reduction in system prompt tokens (587 → 170 lines)
+- Clear audience separation (agent vs user vs developer)
+- Alignment with Anthropic's progressive disclosure philosophy
+- Improved maintainability (single source of truth per topic)
+- Zero functional impact on Claude Code agent behavior
 
----
-
-**Ready to search? Just ask Claude Code!** 🚀
+Analysis: docs/reports/CLAUDE_MD_PROGRESSIVE_DISCLOSURE_ANALYSIS.md
+Implementation: docs/reports/IMPLEMENTATION_PLAN_PROGRESSIVE_DISCLOSURE.md
+-->

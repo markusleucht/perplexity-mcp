@@ -119,9 +119,37 @@ Search social media platforms (X, Reddit, etc).
 ├── src/
 │   └── perplexity_mcp.py    # MCP server implementation
 └── docs/
-    └── plan/
-        └── plan.md           # Implementation plan
+    ├── guides/               # User-facing documentation
+    │   ├── QUICKSTART.md     # Quick start guide
+    │   ├── USER_GUIDE.md     # End user examples & tips
+    │   ├── DEVELOPER_GUIDE.md # Technical API reference
+    │   ├── PHARMA_RESEARCH.md # Pharma skill guide
+    │   └── TROUBLESHOOTING.md # Common issues
+    ├── tools/                # Tool manifests
+    │   ├── mcp-servers.md    # MCP server capabilities
+    │   ├── skills.md         # Installed skills
+    │   └── packages.md       # Package inventory
+    ├── specs/                # Mirrored specifications
+    └── reports/              # Generated research reports
 ```
+
+## Documentation
+
+### Quick Start
+→ [QUICKSTART.md](QUICKSTART.md) - 2 minute setup
+→ [docs/guides/QUICKSTART.md](docs/guides/QUICKSTART.md) - Comprehensive guide
+
+### User Documentation
+→ [docs/guides/USER_GUIDE.md](docs/guides/USER_GUIDE.md) - Examples, tips, output format
+→ [docs/guides/PHARMA_RESEARCH.md](docs/guides/PHARMA_RESEARCH.md) - German pharma market research
+
+### Developer Documentation
+→ [docs/guides/DEVELOPER_GUIDE.md](docs/guides/DEVELOPER_GUIDE.md) - API reference, parameters
+→ [INSTALL.md](INSTALL.md) - Detailed installation instructions
+
+### Support
+→ [docs/guides/TROUBLESHOOTING.md](docs/guides/TROUBLESHOOTING.md) - Common issues & solutions
+→ [CLAUDE.md](CLAUDE.md) - System guidelines & progressive disclosure
 
 ## API Costs
 
