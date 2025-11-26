@@ -1,22 +1,35 @@
 # Pharma-Research Skill Guide
 
-**Last Updated:** November 23, 2025
-**Version:** v2.0.0 (Production-Ready)
-**Audience:** Pharmaceutical market researchers
+**Last Updated:** November 26, 2025
+**Version:** v2.1.0 (Production-Ready)
+**Audience:** German pharmaceutical sales & marketing teams
+**Output Language:** German (Deutsch)
 **Prerequisites:** Claude Code, Perplexity MCP server
 
 ---
 
 ## What It Does
 
-Automatically conducts structured business analysis of German pharma markets with strategic portfolio context:
-- **Indication Analysis:** Epidemiology, unmet needs, care pathways, market access
-- **Medication Analysis:** Competition, differentiation, pricing, adoption barriers, opportunities
-- **Company Portfolio Analysis:** Corporate financials, portfolio composition, strategic product positioning **(NEW in v2.0.0)**
-- **Marketing Investment Scoring:** 1-5 star priority rating with budget recommendations **(NEW in v2.0.0)**
-- **Negotiation Context:** Leverage assessment, partnership potential, budget tier guidance **(NEW in v2.0.0)**
-- **Quality:** Data-driven reports with 20-30 sources, specific numbers with years
-- **Production-Validated:** Successfully tested with real-world analysis (Psoriasis, Bimekizumab & UCB Pharma)
+Automatically conducts structured business analysis of German pharma markets **IN GERMAN** for sales & marketing teams:
+
+### Core Analysis (all reports):
+- **Indikationsanalyse:** Epidemiologie, Versorgungslücken, Behandlungspfade
+- **Medikamentenanalyse:** Wettbewerb, Differenzierung, Marktzugang, Barrieren
+- **SWOT-Analyse:** Strategische Stärken, Schwächen, Chancen, Risiken **(NEW in v2.1.0)**
+- **Geschäftsempfehlungen:** Zielpopulationen, Positionierung, Key Messages **(NEW in v2.1.0)**
+
+### Sales-Focused Content (v2.1.0):
+- **Facharztlandschaft:** Anzahl, Spezialisierung, Verschreibungsverhalten
+- **Verschreibungsbarrieren:** Regressangst, Bürokratie, konservative Einstellung
+- **Regionale Disparitäten:** Wo sind die größten Versorgungslücken?
+- **Wettbewerbsargumente:** Head-to-Head-Daten für Ärztegespräche
+- **Einwandbehandlung:** Wie reagiert man auf Sicherheitsbedenken?
+
+### Quality:
+- **Sprache:** Deutsch (alle Berichte)
+- **Quellen:** 20-30 autoritäre Quellen (RKI, G-BA, KBV, Fachgesellschaften)
+- **Zahlen:** Alle Statistiken mit Jahreszahl
+- **Validated:** Erfolgreich getestet mit Psoriasis/Bimekizumab-Analyse
 
 ---
 
@@ -46,19 +59,20 @@ The skill automatically:
 
 ## Real-World Example
 
-**Query:** "Analyze the German pharmaceutical market for Psoriasis, Bimekizumab, and UCB Pharma"
+**Query:** "Analysiere den deutschen Pharmamarkt für Psoriasis und Bimzelx"
 
-**Result (v2.0.0):**
-- 5-7 page comprehensive business report with 3 major sections
-- **Indication:** 2.2M patients, 2-3% prevalence, biologics adoption 35%
-- **Medication:** Dual IL-17A/F inhibitor, PASI 90: 84-93%, market share 5-8%
-- **Company:** UCB 6.15 Mrd. EUR revenue, 29% R&D ratio, portfolio transformation
-- **Portfolio Position:** Bimzelx 799 Mio. EUR (H1 2025), peak sales >4 Mrd. EUR target, 26% revenue share
-- **Strategic Role:** Growth Driver compensating Cimzia patent loss, mission-critical
-- **Investment Priority:** ⭐⭐⭐⭐⭐ (5/5) - Blockbuster launch
-- **Budget Recommendation:** Premium tier, high negotiation leverage, long-term partnership potential
-- 25-30 authoritative sources (RKI, G-BA, UCB investor reports, Fierce Pharma)
-- Cost: ~$0.08 (8 searches @ "auto" mode)
+**Result (v2.1.0) - German Output:**
+- 5-7 Seiten strategischer Geschäftsbericht **auf Deutsch**
+- **Epidemiologie:** 2,2 Mio. Patienten, 2-3% Prävalenz, 420.000 mittelschwer bis schwer
+- **Versorgungslücke:** 73% ohne Biologika = 308.000 Unterversorgte
+- **Facharztlandschaft:** 6.511 Dermatologen, nur 254 Psoriasis-Spezialisten (4%)
+- **Verschreibungsbarrieren:** Regressangst, Bürokratie, 8-facher Unterschied zwischen Bundesländern
+- **SWOT-Analyse:** Stärken (überlegene PASI-Raten), Schwächen (Candida-Risiko), Chancen (Non-Responder), Risiken (IL-23-Konkurrenz)
+- **Zielpopulationen:** Non-Responder auf IL-17A, PASI-100-Sucher, Unterversorgte
+- **Positionierung:** "Bimzelx – Für Patienten, die mehr erwarten"
+- **Key Message für Außendienst:** Überlegene Hautklarheit, dualer Mechanismus
+- 25-30 Quellen (RKI, G-BA, KBV, Psoriasis-Netz, PMC)
+- Kosten: ~$0.08 (8 Recherchen @ "auto" Modus)
 
 ---
 

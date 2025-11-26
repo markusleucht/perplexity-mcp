@@ -1,5 +1,278 @@
 # Changelog
 
+## 2025-11-26 - DOCX Skill: analytics-docx Workflow + Claude Code Settings
+
+### New: analytics-docx Workflow for esanum Analytics Reports
+
+**Created portable docx workflow** for generating professionally branded Word documents.
+
+**Location:** `~/.claude/skills/docx/workflows/analytics-docx/`
+
+**Structure:**
+```
+workflows/
+├── analytics-docx.md           # Workflow instructions
+└── analytics-docx/             # Bundled assets (portable)
+    ├── design.md               # Design specifications
+    ├── esanum_analytics_grey.png
+    └── esanum_analytics_RGB.png
+```
+
+**Key Features:**
+- Triggers: "analytics report", "Marktanalyse", "esanum report"
+- Grey color scheme (#444444 variations only)
+- Logo aspect ratio enforcement (5.56:1)
+- Auto-width tables, no backgrounds
+- Progressive disclosure (workflow → design.md → docx-js.md)
+
+**Decision Tree Updated in SKILL.md:**
+```
+CREATE new document
+│   What type of document?
+│   ├─ Analytics report ───────► workflows/analytics-docx.md
+│   ├─ [other workflow] ───────► workflows/[name].md
+│   └─ Generic document ───────► docx-js workflow
+```
+
+### Claude Code Global Settings Updated
+
+**File:** `~/.claude/settings.json`
+
+**Permissions auto-allowed (no approval needed):**
+- `Bash(*)` - All bash commands
+- `Read`, `Edit`, `Write` - All file operations
+- `Glob`, `Grep` - All searches
+- `WebFetch`, `WebSearch` - Web operations
+
+**Deny list preserved:** `rm -rf`, `del /q`, `format`, `shutdown`
+
+### Cursor IDE Settings (User Action)
+
+**Recommended settings for autonomous operation:**
+- Auto-Run Mode: "Run Everything"
+- Dotfile Protection: OFF
+- External-File Protection: OFF
+
+### Files Changed
+
+**Created:**
+- `~/.claude/skills/docx/workflows/analytics-docx.md`
+- `~/.claude/skills/docx/workflows/analytics-docx/design.md`
+- `~/.claude/skills/docx/workflows/analytics-docx/esanum_analytics_grey.png`
+- `~/.claude/skills/docx/workflows/analytics-docx/esanum_analytics_RGB.png`
+
+**Modified:**
+- `~/.claude/skills/docx/SKILL.md` - Added decision tree, workflow registry
+- `~/.claude/settings.json` - Updated permissions
+- `docs/assets/design.md` - Added logo aspect ratio (5.56:1) documentation
+
+**Removed:**
+- `test_connection.py` - Cleanup
+- `reports/node_modules/`, `reports/*.js`, `reports/*.json` - Build artifacts
+
+### Session Summary
+
+- Created pharma market analysis report (Psoriasis/Bimekizumab/UCB)
+- Generated Word document with esanum analytics branding
+- Iterated design through 3 versions based on feedback
+- Documented design guidelines in portable workflow
+- Configured autonomous Claude Code operation
+
+---
+
+## 2025-11-26 - Pharma-Research Skill v2.1.0: German Output + Sales Focus + Portfolio Section
+
+### 🎯 Major Update: Sales-Oriented German Reports with Strategic Portfolio Analysis
+
+**Version:** 2.1.0
+**Breaking:** Output language changed from English to German
+
+---
+
+### Session Summary
+
+**User Request:** Create pharma research report for Psoriasis, Bimzelx & UCB Pharma
+
+**What Happened:**
+1. Initial report generated in **English** instead of German
+2. Missing strategic value compared to reference report (`Psoriasis_Bimekizumab_Deutschland_2025.md`)
+3. Included investor/analyst content not relevant for sales teams
+4. Missing UCB portfolio analysis (Cimzia patent loss, strategic dependency on Bimzelx)
+
+**Root Cause Analysis:**
+- Skill v2.0.x did not enforce German output language
+- Output template was data-heavy but lacked strategic SWOT and recommendations
+- No explicit sales focus (Regressangst, Einwandbehandlung, Key Messages)
+- Portfolio section existed but was not emphasized as critical for sales
+
+**Technical Issue Discovered:**
+- **Perplexity MCP was not connected** during report generation
+- Sub-agents fell back to WebSearch instead of Perplexity
+- Result: ~87k Claude tokens consumed across 4 agents, $0 Perplexity cost
+- Reports still generated successfully via WebSearch fallback
+
+---
+
+### Changes Made
+
+#### 1. SKILL.md Updated (v2.0.1 → v2.1.0)
+
+**Output Language Enforcement:**
+```yaml
+output_language: de
+```
+
+**New Required Section 6: Hersteller-Portfolio und strategische Einordnung**
+- Unternehmensüberblick (Umsatz, Mitarbeiter, Therapiegebiete)
+- Portfolio-Struktur (Hauptprodukte, Umsatzanteile)
+- **Strategische Rolle des Medikaments** (Wachstumstreiber? Ersatz für auslaufende Produkte?)
+- Patentabläufe und Umsatzverluste (z.B. Cimzia-Generika-Druck)
+- Abhängigkeit des Herstellers vom Produkt (→ Verhandlungsposition, Supportbereitschaft)
+
+**Sales-Focused Content Requirements:**
+- Facharztlandschaft (Anzahl, Spezialisierung, Verschreibungsverhalten)
+- Einwandbehandlung (wie reagiert man auf Sicherheitsbedenken?)
+- Wettbewerbsargumente (Head-to-Head-Daten, Differenzierung)
+- Patientenprofile (welche Patienten profitieren am meisten?)
+- Regionale Hotspots (wo ist das größte Potenzial?)
+- **Hersteller-Abhängigkeit** (strategische Bedeutung → erwarteter Support, Verhandlungsposition)
+
+**Removed:**
+- Investor/stock analysis (peak sales forecasts, analyst ratings, share price)
+- Target audience changed: "German pharma sales & marketing teams (NOT investors)"
+
+#### 2. output-templates.md Completely Rewritten
+
+**New German Template Structure:**
+1. Executive Summary
+2. Epidemiologie und Marktgröße Deutschland
+3. Produktprofil und Differenzierung
+4. Wettbewerbslandschaft
+5. Versorgungssituation und Verschreiberlandschaft
+6. **Hersteller-Portfolio und strategische Einordnung** (NEW)
+7. Unmet Medical Needs und Marktchancen
+8. Strategische SWOT-Analyse
+9. Geschäftschancen und Empfehlungen
+10. Marktprognose und Vertriebsausblick
+11. Quellenverzeichnis
+
+**New Quality Checklist:**
+- [ ] Report is ENTIRELY in German
+- [ ] SWOT analysis included with 3+ items per category
+- [ ] Quantified unmet needs (patient numbers, not just percentages)
+- [ ] Prescriber barriers documented (Regressangst, Bürokratie, Anzahl Fachärzte)
+- [ ] Regional disparities mentioned with specific Bundesländer
+- [ ] Competitive threats identified (emerging classes, oral alternatives)
+- [ ] Actionable recommendations with target populations
+- [ ] Positioning statement provided
+- [ ] Market forecast with timeline and rationale
+
+**New German Search Queries Added:**
+```
+"Regressangst Dermatologen Biologika Deutschland"
+"Verschreibungsbarrieren [Indikation] Deutschland"
+"Anzahl Fachärzte [Spezialität] Deutschland KBV"
+"Biologika Versorgung Bundesländer Unterschied"
+```
+
+#### 3. PHARMA_RESEARCH.md Guide Updated
+
+**Version:** 2.0.0 → 2.1.0
+**Audience:** "Pharmaceutical market researchers" → "German pharmaceutical sales & marketing teams"
+**Output Language:** Added "German (Deutsch)"
+
+**New Sales-Focused Content Section:**
+- Facharztlandschaft: Anzahl, Spezialisierung, Verschreibungsverhalten
+- Verschreibungsbarrieren: Regressangst, Bürokratie, konservative Einstellung
+- Regionale Disparitäten: Wo sind die größten Versorgungslücken?
+- Wettbewerbsargumente: Head-to-Head-Daten für Ärztegespräche
+- Einwandbehandlung: Wie reagiert man auf Sicherheitsbedenken?
+
+**Updated Real-World Example (German):**
+```
+Query: "Analysiere den deutschen Pharmamarkt für Psoriasis und Bimzelx"
+Result: 5-7 Seiten strategischer Geschäftsbericht auf Deutsch
+```
+
+---
+
+### Reports Generated
+
+**Report 1 (English - Superseded):**
+- File: `reports/Psoriasis_Bimzelx_UCB_Report_2025-11-26.md`
+- Issue: English output, investor-focused, missing portfolio analysis
+- Status: Kept for reference
+
+**Report 2 (German - Final):**
+- File: `reports/Psoriasis_Bimzelx_UCB_Deutschland_2025-11-26.md`
+- Language: German
+- Content: Full portfolio analysis, SWOT, sales recommendations
+- Key Insight: UCB existenziell auf Bimzelx angewiesen (30-35% Umsatz 2030)
+
+---
+
+### Key Improvements in v2.1.0
+
+| Aspect | v2.0.x | v2.1.0 |
+|--------|--------|--------|
+| **Output Language** | English | **German** |
+| **Target Audience** | Market researchers | **Sales & Marketing Teams** |
+| **Portfolio Analysis** | Optional | **Required (Section 6)** |
+| **SWOT Analysis** | Not included | **Required** |
+| **Investor Content** | Included | **Removed** |
+| **Key Messages** | Not included | **Required for Außendienst** |
+| **Einwandbehandlung** | Not included | **Required** |
+
+---
+
+### Technical Notes
+
+**Token Usage (This Session):**
+- 4 sub-agents spawned for parallel research
+- Total: ~87k Claude tokens
+- Perplexity MCP: Not connected (agents used WebSearch fallback)
+- Cost: Claude usage only, $0 Perplexity
+
+**Perplexity MCP Status:**
+- Server configured but not connected during session
+- Agents detected missing MCP and fell back to WebSearch
+- Future sessions should verify MCP connection before research
+
+**Files Modified:**
+- `~/.claude/skills/pharma-research/SKILL.md` (v2.1.0)
+- `~/.claude/skills/pharma-research/references/output-templates.md`
+- `docs/guides/PHARMA_RESEARCH.md`
+- `CHANGELOG.md`
+
+**Files Created:**
+- `reports/Psoriasis_Bimzelx_UCB_Report_2025-11-26.md` (English, superseded)
+- `reports/Psoriasis_Bimzelx_UCB_Deutschland_2025-11-26.md` (German, final)
+
+---
+
+### Lessons Learned
+
+1. **Output language must be explicitly enforced** in skill definition
+2. **Sales teams need different content than investors** - removed analyst ratings, added Einwandbehandlung
+3. **Portfolio analysis is critical for sales** - shows manufacturer dependency and negotiation leverage
+4. **MCP connection should be verified** before spawning research agents
+5. **Reference reports are valuable** - comparing to `Psoriasis_Bimekizumab_Deutschland_2025.md` revealed gaps
+
+---
+
+### Validation Checklist
+
+- [x] SKILL.md updated with German output requirement
+- [x] Portfolio section added as required (Section 6)
+- [x] Sales-focused content requirements documented
+- [x] Investor content removed from requirements
+- [x] output-templates.md rewritten in German
+- [x] PHARMA_RESEARCH.md guide updated
+- [x] German report generated and validated
+- [x] CHANGELOG documented
+
+---
+
 ## 2025-11-23e - Clean Separation: Global vs Project CLAUDE.md
 
 ### 🎯 Lean System Prompting Architecture
