@@ -1,5 +1,312 @@
 # Changelog
 
+## 2025-12-11 - Unified Perplexity MCP (2 Tools, Maximum Quality)
+
+### Major Refactor: Consolidated 3 Tools → 2 Tools
+
+Unified the Perplexity MCP server from 3 overlapping tools to 2 focused tools with maximum quality settings.
+
+**New Tool Structure:**
+
+| Tool | Model | Use Case |
+|------|-------|----------|
+| `perplexity_pro` | sonar-pro (200K context) | Quick research, social, academic |
+| `perplexity_deep` | sonar-deep-research | Exhaustive market research |
+
+---
+
+### Key Changes
+
+**1. Tool Consolidation**
+- `perplexity_search` → `perplexity_pro`
+- `perplexity_social` → merged into `perplexity_pro` via `sources=["social"]` parameter
+- `perplexity_deep_research` → `perplexity_deep`
+
+**2. Maximum Quality Settings (No Limits)**
+- `search_context_size: "high"` for both tools
+- NO `max_tokens` limit - full output
+- `reasoning_effort: "high"` for deep research
+- NO cost info in tool descriptions (quality is priority)
+
+**3. New Report Storage**
+Raw Perplexity output saved to `docs/reports/{ddMMYY}_{report_name}/`:
+```
+docs/reports/111224_bimzelx_analysis/
+├── content.md          # Raw response text
+├── citations.json      # URL array
+└── search_results.json # Rich source data (title, URL, date)
+```
+
+**4. Language Clarification**
+- `response_language` parameter controls **output language only** (via system prompt)
+- Does NOT filter search sources - Perplexity searches globally
+- German default, configurable to en/es/fr/it
+
+**5. Default Context**
+- Response language: German (default)
+- Timeframe: 5 years via prompt enrichment (unless specified in query)
+- Audience: Pharma marketing agency Berlin (auto-applied for pharma queries)
+
+---
+
+### Files Changed
+
+| File | Action |
+|------|--------|
+| `src/perplexity_mcp_server.py` | **REFACTORED** - 3 tools → 2 tools |
+| `src/perplexity_deep_research.py` | **DELETED** - Duplicate removed |
+| `src/__init__.py` | Updated exports |
+| `docs/tools/mcp-servers.md` | Updated documentation |
+| `.claude/settings.local.json` | Updated permissions |
+
+---
+
+### API Configuration
+
+**perplexity_pro:**
+```python
+model="sonar-pro"
+search_context_size="high"
+sources=["web"|"social"|"scholar"]  # Configurable
+search_recency_filter=optional
+# NO max_tokens
+```
+
+**perplexity_deep:**
+```python
+model="sonar-deep-research"
+reasoning_effort="high"
+search_context_size="high"
+# NO max_tokens - unlimited
+```
+
+---
+
+### Parameter Reference
+
+**perplexity_pro:**
+- `query` (required) - Search query
+- `sources` - ["web"], ["social"], ["scholar"] or combinations
+- `search_recency_filter` - "day", "week", "month", "year"
+- `response_language` - "de" (default), "en", "es", "fr", "it"
+- `report_name` - Save to docs/reports/{date}_{name}/
+
+**perplexity_deep:**
+- `query` (required) - Research query
+- `context_hint` - "pharma", "market", "tech" (auto-detected)
+- `skip_enrichment` - Send raw query without optimization
+- `report_name` - Save to docs/reports/{date}_{name}/
+
+---
+
+### Breaking Changes
+
+**Tool names changed:**
+- `perplexity_search` → `perplexity_pro`
+- `perplexity_social` → Use `perplexity_pro(sources=["social"])`
+- `perplexity_deep_research` → `perplexity_deep`
+
+**Permissions update required:**
+Update `.claude/settings.local.json` with new tool names.
+
+---
+
+### Migration
+
+1. Update permissions in `.claude/settings.local.json`:
+   - `mcp__perplexity__perplexity_pro`
+   - `mcp__perplexity__perplexity_deep`
+2. Restart Claude Code to reload MCP server
+3. Update any scripts using old tool names
+
+---
+
+## 2025-12-10 - Deep Research MCP Tool (Maximum Quality, No Limits)
+
+### Major Feature: `perplexity_deep_research` Tool
+
+Created a new maximum-quality deep research tool using Perplexity's `sonar-deep-research` model.
+
+**Design Philosophy:**
+- **NO LIMITS** - No token caps, no budget constraints
+- **Maximum Quality** - `reasoning_effort: high`, `search_context_size: high`
+- **Raw Output** - No summarization, no transformation, full Perplexity response
+- **Sources as Links** - `search_results` with title, URL, date included
+- **German Output** - Always responds in German
+- **Flexible** - Pharma research as default, but open to any query type
+
+**Cost:** ~$1.00-1.50 per query (comprehensive deep research)
+
+---
+
+### Files Created
+
+**`src/prompt_enrichment.py`** (NEW)
+- Entity detection (drugs, indications, manufacturers)
+- Query enrichment following Perplexity best practices:
+  - Drug expansion: "Bimzelx" → "Bimzelx (Bimekizumab) UCB IL-17A/F Inhibitor"
+  - Temporal context: last 5 years (2020-2025)
+  - Geographic context: Germany
+  - Pharma market keywords (if pharma query detected)
+- Database of 23 common pharmaceutical drugs
+- 10 indication categories with German equivalents
+
+**`src/perplexity_deep_research.py`** (NEW)
+- Standalone deep research function
+- Can be used independently of MCP server
+- Includes test code for direct execution
+
+---
+
+### Files Modified
+
+**`src/perplexity_mcp_server.py`**
+- Added `perplexity_deep_research` tool with MCP annotations
+- Added `DeepResearchRequest` Pydantic model
+- Added `format_sources_as_markdown()` function
+- Added German system prompt (no summarization, no forced tables)
+- Imports prompt enrichment module
+- Tool annotations: `readOnlyHint`, `openWorldHint`, `idempotentHint`
+
+**`src/__init__.py`**
+- Added exports for new modules
+- `perplexity_deep_research`, `enrich_query`, `is_pharma_query`, etc.
+
+**`docs/tools/mcp-servers.md`**
+- Documented new `perplexity_deep_research` tool
+- Parameters, returns, costs, examples
+- Prompt enrichment documentation
+
+---
+
+### Implementation Details
+
+**API Call Structure (Maximum Quality):**
+```python
+client.chat.completions.create(
+    model="sonar-deep-research",
+    messages=[
+        {"role": "system", "content": GERMAN_SYSTEM_PROMPT},
+        {"role": "user", "content": enriched_query}
+    ],
+    stream=False,  # Required to get search_results
+    reasoning_effort="high",
+    web_search_options={
+        "search_context_size": "high"
+    }
+    # NO max_tokens - unlimited
+)
+```
+
+**German System Prompt:**
+```
+Du bist ein Experte fuer Marktforschung und Analyse.
+
+Anforderungen:
+- Liefere evidenzbasierte Erkenntnisse mit konkreten Daten
+- Zitiere Quellen im Text natuerlich
+- Benenne Datenluecken klar
+- Schreibe ausfuehrlich - keine Zusammenfassungen
+- Vermeide uebermassige Tabellen
+
+Antworte auf Deutsch.
+```
+
+**Pharma Context (auto-appended for pharma queries):**
+- Target audience: Sales executives in pharma marketing agency (Berlin)
+- Content focus: Product, market potential, portfolio relevance, lifecycle stage
+
+**Response Structure:**
+```python
+{
+    "success": True,
+    "content": "Full German research text...",
+    "search_results": [
+        {"title": "...", "url": "...", "date": "..."}
+    ],
+    "usage": {
+        "prompt_tokens": int,
+        "completion_tokens": int,
+        "reasoning_tokens": int
+    },
+    "metadata": {
+        "model": "sonar-deep-research",
+        "reasoning_effort": "high",
+        "enriched_query": "...",
+        "entities_detected": {},
+        "context_applied": []
+    }
+}
+```
+
+---
+
+### MCP Builder Skill Installed
+
+Downloaded and installed Anthropic's MCP Builder skill at user level for future reference:
+- `~/.claude/skills/mcp-builder/SKILL.md`
+- `~/.claude/skills/mcp-builder/reference/python_mcp_server.md`
+- `~/.claude/skills/mcp-builder/reference/mcp_best_practices.md`
+
+**Key MCP Best Practices Applied:**
+- Tool names: `{service}_{action}_{resource}` format
+- Pydantic input validation with ConfigDict
+- Tool annotations (readOnlyHint, openWorldHint, idempotentHint)
+- Actionable error messages
+- Type hints throughout
+
+---
+
+### Usage Examples
+
+**Pharma Research (auto-detected):**
+```
+"Analysiere Bimzelx fuer Psoriasis von UCB - Marktposition Deutschland"
+```
+
+**General Research:**
+```
+"Wie entwickelt sich der deutsche E-Auto-Markt 2024?"
+"Was sind die aktuellen Entwicklungen in der KI-Regulierung der EU?"
+```
+
+**With file save:**
+```python
+perplexity_deep_research({
+    "query": "Analysiere SGLT2-Inhibitoren bei Herzinsuffizienz",
+    "context_hint": "pharma",
+    "save_to_file": "sglt2_research.md"
+})
+```
+
+---
+
+### Validation
+
+- [x] Python syntax: All files pass `py_compile`
+- [x] Prompt enrichment: Entities detected, context applied
+- [x] MCP server: Tool registered with annotations
+- [x] Documentation: mcp-servers.md updated
+- [ ] Live test: Pending API call (requires restart)
+
+---
+
+### Key Differences from Existing Tools
+
+| Feature | `perplexity_search` | `perplexity_deep_research` |
+|---------|--------------------|-----------------------------|
+| Model | sonar / sonar-pro | sonar-deep-research |
+| Cost | ~$0.01-0.02 | ~$1.00-1.50 |
+| Token limit | 4000 | **Unlimited** |
+| Reasoning | Standard | **High effort** |
+| Search depth | Standard/High | **High** |
+| Output | Structured | **Raw, unaltered** |
+| Language | Configurable | **Always German** |
+| Query enrichment | No | **Yes** |
+| Pharma context | No | **Auto-detected** |
+
+---
+
 ## 2025-11-26 - DOCX Skill: analytics-docx Workflow + Claude Code Settings
 
 ### New: analytics-docx Workflow for esanum Analytics Reports

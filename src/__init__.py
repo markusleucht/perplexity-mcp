@@ -1,15 +1,20 @@
-"""Perplexity MCP Server"""
+"""Perplexity MCP Server - Unified Research Tools"""
 
-from .perplexity_mcp import (
-    perplexity_search,
-    perplexity_social,
-    MCP_TOOLS,
-    process_tool_call,
+from .perplexity_mcp_server import mcp
+
+from .prompt_enrichment import (
+    enrich_query,
+    is_pharma_query,
+    detect_entities,
+    get_pharma_system_context,
 )
 
 __all__ = [
-    "perplexity_search",
-    "perplexity_social",
-    "MCP_TOOLS",
-    "process_tool_call",
+    # MCP Server
+    "mcp",
+    # Enrichment
+    "enrich_query",
+    "is_pharma_query",
+    "detect_entities",
+    "get_pharma_system_context",
 ]

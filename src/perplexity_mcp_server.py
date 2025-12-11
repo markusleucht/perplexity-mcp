@@ -1,16 +1,22 @@
-#!/usr/bin/env /opt/homebrew/bin/python3.11
+#!/usr/bin/env python3
 """
-Official MCP server for Perplexity AI integration with Claude Code.
-Uses the official Anthropic MCP SDK.
+Unified Perplexity MCP Server for Claude Code.
+
+Tools:
+- perplexity_pro: Pro Search with sonar-pro (200K context) - quick research, social, academic
+- perplexity_deep: Deep Research with sonar-deep-research - exhaustive analysis
 """
 
 import os
-from typing import Optional
+import json
+from typing import Optional, List, Dict, Any
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from dotenv import load_dotenv
 from openai import OpenAI
 from datetime import datetime
+
+from .prompt_enrichment import enrich_query, is_pharma_query, get_pharma_system_context
 
 # Load environment variables
 load_dotenv()
@@ -23,162 +29,239 @@ if not API_KEY:
 client = OpenAI(api_key=API_KEY, base_url="https://api.perplexity.ai")
 
 # Initialize FastMCP server
-mcp = FastMCP("Perplexity Search")
+mcp = FastMCP("Perplexity Research")
 
 
-class SearchRequest(BaseModel):
-    """Request parameters for Perplexity search."""
-    query: str = Field(description="The search query (any language, auto-detected)")
-    search_type: str = Field(
-        default="auto",
-        description="Search type: 'pro' (deep research), 'auto' (balanced, recommended), 'fast' (quick results)"
+# ============================================================================
+# SYSTEM PROMPTS
+# ============================================================================
+
+def get_pro_system_prompt(language: str = "de") -> str:
+    """Get system prompt for Pro Search with specified output language."""
+    language_map = {
+        "de": "Deutsch",
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "it": "Italiano",
+    }
+    lang_name = language_map.get(language, "Deutsch")
+
+    return f"""Du bist ein praeziser Recherche-Assistent.
+
+Anforderungen:
+- Nutze **spezifische Daten mit Jahreszahl** (keine generischen Aussagen)
+- Fuege immer **Kontext** hinzu: Veraenderung ueber Zeit + Vergleich mit Benchmarks
+- Wenn keine zuverlaessigen Quellen: klar sagen (nicht raten)
+- Struktur:
+  1) **Kernfakten** (2-3 Saetze, mit Zahlen)
+  2) **Datenpunkte** (Aufzaehlung, inkl. Jahr)
+  3) **Kurze Interpretation**
+  4) **Quellen** (Institution + Jahr)
+
+Antworte auf {lang_name}."""
+
+
+DEEP_RESEARCH_SYSTEM_PROMPT = """Du bist ein Experte fuer Marktforschung und Analyse.
+
+Anforderungen:
+- Liefere evidenzbasierte Erkenntnisse mit konkreten Daten und Jahreszahlen
+- Zitiere Quellen im Text natuerlich (z.B. "Laut RKI-Daten 2024...")
+- Benenne Datenluecken klar, anstatt zu spekulieren
+- Schreibe ausfuehrlich und vollstaendig - keine Zusammenfassungen
+- Vermeide uebermassige Tabellen - bevorzuge Fliesstext mit Aufzaehlungen
+
+Praesentiere die Ergebnisse in deinem natuerlichen Erzaehlstil.
+Erzwinge keine starren Strukturen oder repetitive Formate.
+
+Antworte auf Deutsch."""
+
+
+# ============================================================================
+# REQUEST MODELS
+# ============================================================================
+
+class ProSearchRequest(BaseModel):
+    """Request parameters for Pro Search."""
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    query: str = Field(
+        ...,
+        description="Search query (any language). Searches global sources.",
+        min_length=3,
+        max_length=10000
     )
-    max_tokens: int = Field(
-        default=1024,
-        ge=100,
-        le=4000,
-        description="Maximum tokens in response (100-4000)"
-    )
-    sources: list[str] = Field(
+    sources: List[str] = Field(
         default=["web"],
-        description="Sources to search: 'web', 'social', 'scholar' - can combine multiple"
+        description="Sources: 'web' (general), 'social' (Twitter/Reddit/forums), 'scholar' (academic). Can combine."
     )
-    language: str = Field(
-        default="en",
-        description="Response language: 'en' (English), 'de' (Deutsch), 'es', 'fr', 'it'"
-    )
-    save_to_file: Optional[str] = Field(
+    search_recency_filter: Optional[str] = Field(
         default=None,
-        description="Optional file path to save markdown report (e.g., 'report.md')"
+        description="Recency filter: 'day', 'week', 'month', 'year'. None = all time (5yr default via enrichment)."
+    )
+    response_language: str = Field(
+        default="de",
+        description="Output language: 'de' (German), 'en', 'es', 'fr', 'it'. Does NOT limit search sources."
+    )
+    report_name: Optional[str] = Field(
+        default=None,
+        description="Save report to docs/reports/{date}_{name}/. E.g., 'bimzelx_analysis'"
     )
 
 
-class SocialSearchRequest(BaseModel):
-    """Request parameters for social media search."""
-    query: str = Field(description="Search query for social media/forums")
-    max_tokens: int = Field(default=1024, ge=100, le=4000)
-    save_to_file: Optional[str] = Field(default=None)
+class DeepResearchRequest(BaseModel):
+    """Request parameters for Deep Research."""
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    query: str = Field(
+        ...,
+        description="Research query. Pharma context auto-detected and enriched.",
+        min_length=5,
+        max_length=10000
+    )
+    context_hint: Optional[str] = Field(
+        default=None,
+        description="Context hint: 'pharma', 'market', 'tech'. Auto-detected if omitted."
+    )
+    skip_enrichment: bool = Field(
+        default=False,
+        description="If True, send raw query without search optimization."
+    )
+    report_name: Optional[str] = Field(
+        default=None,
+        description="Save report to docs/reports/{date}_{name}/. E.g., 'ozempic_market_research'"
+    )
 
 
-def format_to_markdown(query: str, content: str, citations: list, search_type: str, search_focus: str = None) -> str:
-    """Format search results as professional markdown report."""
-    today = datetime.now().strftime("%d. %B %Y")
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
 
-    md = content + "\n\n"
-
-    if citations:
-        md += "## Quellen\n\n"
-        for i, citation in enumerate(citations, 1):
-            md += f"{i}. {citation}\n"
-
-    md += "\n---\n\n"
-    md += f"*Recherchiert: {today}*\n"
-    method = "mit Fokus auf soziale Medien und Fachforen" if search_focus == "social" else "auf Web-Quellen"
-    model = "sonar-pro" if search_type == "pro" else "sonar"
-    md += f"*Methode: Perplexity {'Pro' if search_type == 'pro' else ''} Search {method} ({model})*\n"
-    md += f"*Anfrage: {query}*\n"
-
-    return md
-
-
-@mcp.tool()
-def perplexity_search(request: SearchRequest) -> dict:
+def save_report(report_name: str, content: str, citations: list, search_results: list) -> str:
     """
-    Perform Perplexity Search with web crawling, real-time data, and verified sources.
+    Save raw Perplexity output to docs/reports/{ddMMYY}_{report_name}/.
 
-    Returns professional markdown reports with 15-20 source citations.
-    Supports web, social media, and academic sources.
+    Creates 3 files:
+    - content.md: Raw response text
+    - citations.json: URL array
+    - search_results.json: Rich source data (title, URL, date)
 
-    Cost: ~$0.005-0.01 per search (auto/fast), ~$0.01-0.02 per search (pro)
+    Returns folder path.
+    """
+    date_prefix = datetime.now().strftime("%d%m%y")
+    folder = f"docs/reports/{date_prefix}_{report_name}"
+    os.makedirs(folder, exist_ok=True)
+
+    # content.md - raw markdown
+    with open(f"{folder}/content.md", "w", encoding="utf-8") as f:
+        f.write(content)
+
+    # citations.json - URL array
+    with open(f"{folder}/citations.json", "w", encoding="utf-8") as f:
+        json.dump(citations, f, indent=2, ensure_ascii=False)
+
+    # search_results.json - rich source data
+    with open(f"{folder}/search_results.json", "w", encoding="utf-8") as f:
+        json.dump(search_results, f, indent=2, ensure_ascii=False)
+
+    return folder
+
+
+# ============================================================================
+# TOOLS
+# ============================================================================
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "openWorldHint": True,
+        "idempotentHint": True,
+    }
+)
+def perplexity_pro(request: ProSearchRequest) -> dict:
+    """
+    Pro Search with sonar-pro model (200K context).
+
+    Features:
+    - search_context_size: high (maximum search depth)
+    - Configurable sources: web, social, scholar
+    - Configurable recency filter
+    - German output by default (searches global sources)
+
+    Use for:
+    - Quick research tasks
+    - Current events and news
+    - Social media sentiment (sources=["social"])
+    - Academic papers (sources=["scholar"])
+    - Competitive intelligence snapshots
+
+    For exhaustive research requiring deep analysis, use perplexity_deep instead.
     """
     try:
-        # Language mapping for system instruction
-        language_map = {
-            "de": "Deutsch (German)",
-            "es": "Español (Spanish)",
-            "fr": "Français (French)",
-            "it": "Italiano (Italian)",
-            "en": "English",
-        }
-        lang_name = language_map.get(request.language, "English")
+        # Build system prompt with response language
+        system_content = get_pro_system_prompt(request.response_language)
 
-        # Build system message with research guidelines
-        system_message = f"""You are a precision research assistant.
+        # Add pharma context if detected
+        if is_pharma_query(request.query):
+            system_content += "\n\n" + get_pharma_system_context()
 
-Requirements:
-- Use **specific data with year** (no generic statements)
-- Always add **context**: change over time + comparison to relevant benchmarks
-- If no reliable sources: clearly say so (no guessing)
-- Structure:
-  1) **Key facts** (2–3 sentences, with numbers)
-  2) **Data points** (bullets, incl. year)
-  3) **Brief interpretation**
-  4) **Sources** (institution + year)
-
-Provide your response in {lang_name}."""
-
-        # Select model based on search type
-        model = "sonar-pro" if request.search_type == "pro" else "sonar"
-
-        # Build request
+        # Build API request - NO max_tokens limit
         request_kwargs = {
-            "model": model,
+            "model": "sonar-pro",
             "messages": [
-                {"role": "system", "content": system_message},
+                {"role": "system", "content": system_content},
                 {"role": "user", "content": request.query}
             ],
-            "max_tokens": request.max_tokens,
             "stream": False,
-            "web_search_options": {"search_type": request.search_type},
+            "web_search_options": {
+                "search_context_size": "high"
+            },
         }
 
-        # Add sources if specified
+        # Add sources
         if request.sources:
             request_kwargs["extra_body"] = {"sources": request.sources}
+
+        # Add recency filter if specified
+        if request.search_recency_filter:
+            request_kwargs["web_search_options"]["search_recency_filter"] = request.search_recency_filter
 
         # Perform search
         response = client.chat.completions.create(**request_kwargs)
         content = response.choices[0].message.content
 
-        # Extract citations
+        # Extract citations and search_results (raw)
         response_dict = response.model_dump()
-        citations = []
+        citations = response_dict.get("citations", [])
+        search_results = response_dict.get("search_results", [])
 
-        if 'citations' in response_dict and response_dict['citations']:
-            citations = response_dict['citations']
-
-        if 'search_results' in response_dict and response_dict['search_results']:
-            search_results = response_dict['search_results']
-            if not citations:
-                citations = [result.get('url') for result in search_results if result.get('url')]
-
-        # Format as markdown
-        markdown = format_to_markdown(request.query, content, citations, request.search_type)
-
+        # Build result
         result = {
             "success": True,
             "content": content,
             "citations": citations,
-            "search_type": request.search_type,
-            "sources": request.sources,
-            "language": request.language,
-            "markdown": markdown,
+            "search_results": search_results,
+            "metadata": {
+                "model": "sonar-pro",
+                "sources": request.sources,
+                "response_language": request.response_language,
+                "search_context_size": "high",
+                "timestamp": datetime.now().isoformat(),
+            }
         }
 
-        # Save to file if requested
-        if request.save_to_file:
+        # Save report if requested
+        if request.report_name:
             try:
-                # Default to reports/ directory
-                filepath = request.save_to_file
-                if "/" not in filepath:
-                    filepath = f"reports/{filepath}"
-
-                os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
-                with open(filepath, "w") as f:
-                    f.write(markdown)
-                result["file_saved"] = filepath
+                folder = save_report(
+                    report_name=request.report_name,
+                    content=content,
+                    citations=citations,
+                    search_results=search_results
+                )
+                result["report_saved"] = folder
             except Exception as e:
-                result["file_error"] = str(e)
+                result["report_error"] = str(e)
 
         return result
 
@@ -188,94 +271,121 @@ Provide your response in {lang_name}."""
             "error": str(e),
             "content": None,
             "citations": [],
+            "search_results": [],
         }
 
 
-@mcp.tool()
-def perplexity_social(request: SocialSearchRequest) -> dict:
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "openWorldHint": True,
+        "idempotentHint": True,
+    }
+)
+def perplexity_deep(request: DeepResearchRequest) -> dict:
     """
-    Search social media and expert forums (Twitter/X, Reddit, forums) with Perplexity.
+    Deep Research with sonar-deep-research model.
 
-    Returns professional markdown report with verified source citations.
+    Maximum quality settings:
+    - reasoning_effort: high
+    - search_context_size: high
+    - NO token limits (full output)
+    - Raw, unaltered Perplexity response
+
+    Features:
+    - Auto-detects pharma queries and applies enrichment
+    - Default pharma marketing agency context (Berlin)
+    - 5-year default timeframe via prompt enrichment
+    - Comprehensive source citations
+
+    Use for:
+    - Comprehensive market research
+    - Detailed product analysis
+    - In-depth competitive intelligence
+    - Any topic requiring exhaustive research
+
+    For quick searches, use perplexity_pro instead.
     """
     try:
-        system_message = """You are a precision research assistant.
-
-Requirements:
-- Use **specific data with year** (no generic statements)
-- Always add **context**: change over time + comparison to relevant benchmarks
-- If no reliable sources: clearly say so (no guessing)
-- Structure:
-  1) **Key facts** (2–3 sentences, with numbers)
-  2) **Data points** (bullets, incl. year)
-  3) **Brief interpretation**
-  4) **Sources** (institution + year)
-
-Provide your response in English."""
-
-        # Social search uses sonar-pro with social sources
-        response = client.chat.completions.create(
-            model="sonar-pro",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": request.query}
-            ],
-            max_tokens=request.max_tokens,
-            stream=False,
-            web_search_options={"search_type": "pro"},
-            extra_body={"sources": ["social"]},
+        # Enrich query following Perplexity best practices
+        enriched_query, enrichment_meta = enrich_query(
+            query=request.query,
+            context_hint=request.context_hint,
+            skip_enrichment=request.skip_enrichment
         )
 
+        # Build system prompt
+        system_content = DEEP_RESEARCH_SYSTEM_PROMPT
+
+        # Add pharma context if detected
+        if is_pharma_query(request.query) or request.context_hint == "pharma":
+            system_content += "\n\n" + get_pharma_system_context()
+
+        # API call with MAXIMUM QUALITY settings
+        # NO max_tokens - unlimited output
+        response = client.chat.completions.create(
+            model="sonar-deep-research",
+            messages=[
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": enriched_query}
+            ],
+            stream=False,
+            reasoning_effort="high",
+            web_search_options={
+                "search_context_size": "high"
+            },
+        )
+
+        # Extract content (RAW, UNALTERED)
         content = response.choices[0].message.content
 
-        # Extract citations
+        # Extract citations and search_results (raw)
         response_dict = response.model_dump()
-        citations = []
+        citations = response_dict.get("citations", [])
+        search_results = response_dict.get("search_results", [])
 
-        if 'citations' in response_dict and response_dict['citations']:
-            citations = response_dict['citations']
-
-        if 'search_results' in response_dict and response_dict['search_results']:
-            search_results = response_dict['search_results']
-            if not citations:
-                citations = [result.get('url') for result in search_results if result.get('url')]
-
-        # Format as markdown
-        markdown = format_to_markdown(request.query, content, citations, "pro", "social")
-
+        # Build result
         result = {
             "success": True,
             "content": content,
             "citations": citations,
-            "search_focus": "social",
-            "markdown": markdown,
+            "search_results": search_results,
+            "metadata": {
+                "model": "sonar-deep-research",
+                "reasoning_effort": "high",
+                "search_context_size": "high",
+                "enriched_query": enriched_query if not request.skip_enrichment else None,
+                "enrichment_applied": enrichment_meta.get("enriched", False),
+                "entities_detected": enrichment_meta.get("entities_detected", {}),
+                "context_applied": enrichment_meta.get("context_applied", []),
+                "timestamp": datetime.now().isoformat(),
+            }
         }
 
-        # Save to file if requested
-        if request.save_to_file:
+        # Save report if requested
+        if request.report_name:
             try:
-                filepath = request.save_to_file
-                if "/" not in filepath:
-                    filepath = f"reports/{filepath}"
-
-                os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
-                with open(filepath, "w") as f:
-                    f.write(markdown)
-                result["file_saved"] = filepath
+                folder = save_report(
+                    report_name=request.report_name,
+                    content=content,
+                    citations=citations,
+                    search_results=search_results
+                )
+                result["report_saved"] = folder
             except Exception as e:
-                result["file_error"] = str(e)
+                result["report_error"] = str(e)
 
         return result
 
     except Exception as e:
         return {
             "success": False,
-            "error": str(e),
+            "error": f"Deep research failed: {str(e)}",
             "content": None,
             "citations": [],
+            "search_results": [],
         }
 
 
 if __name__ == "__main__":
-    # Run the MCP server on stdio
     mcp.run()

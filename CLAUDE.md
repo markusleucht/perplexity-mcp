@@ -12,9 +12,9 @@
 ### Available Tools
 
 📋 **MCP Server:** [`docs/tools/mcp-servers.md`](docs/tools/mcp-servers.md)
-- `mcp__perplexity__perplexity_search` - Pro Search with web crawling
-- `mcp__perplexity__perplexity_social` - Social media & forums search
-- **Always check parameters, costs, and examples before calling**
+- `mcp__perplexity__perplexity_pro` - Pro Search (sonar-pro, 200K context) - quick research, social, academic
+- `mcp__perplexity__perplexity_deep` - Deep Research (sonar-deep-research) - exhaustive analysis
+- **Check manifest for parameters and examples before calling**
 
 🎯 **Skills:** [`docs/tools/skills.md`](docs/tools/skills.md)
 - `pharma-research` - German pharmaceutical market research skill (v2.0.0)
@@ -27,7 +27,7 @@
 ### When to Consult Manifests
 
 **Before using a tool:**
-1. Read `docs/tools/mcp-servers.md` for parameters, returns, costs
+1. Read `docs/tools/mcp-servers.md` for parameters and returns
 2. Check examples for proper usage
 3. Verify tool is documented
 
@@ -46,10 +46,11 @@
 - German pharmaceutical market research via specialized skill
 
 **Key Features:**
-- Pro Search: Deep research with web crawling (~$0.01-0.02/query)
-- Social Search: Twitter/X, Reddit, forums (~$0.01-0.02/query)
-- German language support (auto-detected)
-- Pharma-research skill: Structured business analysis (~$0.06-0.10/report)
+- Pro Search: Quick research with configurable sources (web, social, scholar)
+- Deep Research: Exhaustive analysis with maximum reasoning
+- German response language by default (searches global sources)
+- Auto-enrichment for pharma queries (5-year timeframe, entity expansion)
+- Report output: `docs/reports/{ddMMYY}_{name}/` with raw Perplexity data
 
 **Specifications:**
 - MCP Protocol: See `docs/specs/mcp_research.md`

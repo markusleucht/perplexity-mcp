@@ -2,14 +2,14 @@
 
 **Purpose:** Progressive disclosure of MCP server capabilities installed in this environment.
 
-**Last Updated:** November 23, 2025
+**Last Updated:** December 11, 2025
 
 ---
 
 ## Perplexity MCP Server
 
 **Repository:** https://github.com/markusleucht/perplexity-mcp
-**Status:** ✅ Active
+**Status:** Active
 **Configuration:** `.mcp.json`
 **API Key:** `.env` (PERPLEXITY_API_KEY)
 
@@ -26,19 +26,24 @@ Deep research with web crawling, social media search, and real-time data from Pe
 
 ### Available Tools
 
-#### 1. `mcp__perplexity__perplexity_search`
+#### 1. `mcp__perplexity__perplexity_pro`
 
-**Purpose:** Comprehensive search with web crawling and deep research
+**Purpose:** Pro Search with sonar-pro model (200K context)
+
+**Features:**
+- `search_context_size: high` (maximum search depth)
+- Configurable sources: web, social, scholar
+- Configurable recency filter
+- German output by default (searches global sources)
 
 **Parameters:**
 ```python
 {
-  "query": str,              # Required - Search query (any language)
-  "search_type": str,        # Optional - "pro"|"auto"|"fast" (default: "auto")
-  "sources": list[str],      # Optional - ["web"]|["social"]|["scholar"] (default: ["web"])
-  "language": str,           # Optional - "en"|"de"|"es"|"fr"|"it" (default: "de")
-  "max_tokens": int,         # Optional - 100-4000 (default: 1024)
-  "save_to_file": str        # Optional - Path to save markdown report
+  "query": str,                    # Required - Search query (any language)
+  "sources": list[str],            # Optional - ["web"]|["social"]|["scholar"] (default: ["web"])
+  "search_recency_filter": str,    # Optional - "day"|"week"|"month"|"year" (default: None)
+  "response_language": str,        # Optional - "de"|"en"|"es"|"fr"|"it" (default: "de")
+  "report_name": str               # Optional - Save to docs/reports/{date}_{name}/
 }
 ```
 
@@ -46,74 +51,153 @@ Deep research with web crawling, social media search, and real-time data from Pe
 ```python
 {
   "success": bool,
-  "content": str,            # Text answer
-  "markdown": str,           # Formatted report with citations
-  "citations": list[str],    # Source URLs
-  "file_saved": str,         # Path if saved
-  "error": str               # Error message if failed
+  "content": str,              # Raw Perplexity response (markdown)
+  "citations": list[str],      # URL array
+  "search_results": [          # Rich source data
+    {"title": str, "url": str, "date": str}
+  ],
+  "metadata": {
+    "model": "sonar-pro",
+    "sources": list,
+    "response_language": str,
+    "search_context_size": "high",
+    "timestamp": str
+  },
+  "report_saved": str          # Folder path if saved
 }
 ```
 
-**Cost:** ~$0.005-0.01 per search (auto mode), ~$0.01-0.02 (pro mode)
+**Report Output (if report_name provided):**
+```
+docs/reports/{ddMMYY}_{report_name}/
+├── content.md          # Raw response text
+├── citations.json      # URL array
+└── search_results.json # Rich source data
+```
+
+**Use for:**
+- Quick research tasks
+- Current events and news
+- Social media sentiment (`sources=["social"]`)
+- Academic papers (`sources=["scholar"]`)
+- Competitive intelligence snapshots
 
 **Examples:**
 ```
-"Search for German pharmaceutical regulations 2025"
-"Find the latest AI developments in healthcare"
-"Research Diabetes Type 2 treatment landscape in Germany"
+perplexity_pro(query="German pharmaceutical regulations 2025")
+perplexity_pro(query="AI healthcare trends", sources=["scholar"])
+perplexity_pro(query="Ozempic discussions", sources=["social"], report_name="ozempic_social")
 ```
 
-#### 2. `mcp__perplexity__perplexity_social`
+---
 
-**Purpose:** Search social media and expert forums (Twitter/X, Reddit, forums)
+#### 2. `mcp__perplexity__perplexity_deep`
+
+**Purpose:** Deep Research with sonar-deep-research model
+
+**Maximum quality settings:**
+- `reasoning_effort: high`
+- `search_context_size: high`
+- NO token limits (full output)
+- Raw, unaltered Perplexity response
+
+**Features:**
+- Auto-detects pharma queries and applies enrichment
+- Default pharma marketing agency context (Berlin)
+- 5-year default timeframe via prompt enrichment
+- Comprehensive source citations
 
 **Parameters:**
 ```python
 {
-  "query": str,              # Required - Social media search query
-  "max_tokens": int,         # Optional - 100-4000 (default: 1024)
-  "save_to_file": str        # Optional - Path to save report
+  "query": str,                # Required - Research query (any topic)
+  "context_hint": str,         # Optional - "pharma"|"market"|"tech" (auto-detected)
+  "skip_enrichment": bool,     # Optional - Send raw query without optimization (default: False)
+  "report_name": str           # Optional - Save to docs/reports/{date}_{name}/
 }
 ```
 
-**Returns:** Same structure as `perplexity_search`
+**Returns:**
+```python
+{
+  "success": bool,
+  "content": str,              # FULL Perplexity response (no summarization)
+  "citations": list[str],      # URL array
+  "search_results": [          # Rich source data
+    {"title": str, "url": str, "date": str}
+  ],
+  "metadata": {
+    "model": "sonar-deep-research",
+    "reasoning_effort": "high",
+    "search_context_size": "high",
+    "enriched_query": str,     # What was actually sent
+    "enrichment_applied": bool,
+    "entities_detected": {},   # Detected drugs, indications, etc.
+    "context_applied": [],
+    "timestamp": str
+  },
+  "report_saved": str          # Folder path if saved
+}
+```
 
-**Cost:** ~$0.01-0.02 per search
+**Report Output (if report_name provided):**
+```
+docs/reports/{ddMMYY}_{report_name}/
+├── content.md          # Raw response text
+├── citations.json      # URL array
+└── search_results.json # Rich source data
+```
+
+**Prompt Enrichment:**
+Queries are automatically enriched following Perplexity best practices:
+- Drug/indication entity expansion (e.g., "Bimzelx" → "Bimzelx (Bimekizumab) UCB IL-17A/F Inhibitor")
+- Temporal context (last 5 years)
+- Geographic context (Germany)
+- Pharma market keywords (if pharma query detected)
+
+**Use for:**
+- Comprehensive market research
+- Detailed product analysis
+- In-depth competitive intelligence
+- Any topic requiring exhaustive research
 
 **Examples:**
 ```
-"What are people discussing about AI safety on social media?"
-"Find Reddit discussions about Claude Code"
-"Search Twitter for opinions on new pharma regulations"
+perplexity_deep(query="Analysiere Bimzelx fuer Psoriasis von UCB - Marktposition Deutschland")
+perplexity_deep(query="Wie entwickelt sich der deutsche E-Auto-Markt?", context_hint="market")
+perplexity_deep(query="KI-Regulierung der EU", report_name="eu_ai_regulation")
 ```
 
+---
+
 ### Limitations
-- Requires valid Perplexity API key ($5 initial credit)
+- Requires valid Perplexity API key
 - Rate limits: Check https://www.perplexity.ai/settings/api
-- Language support: EN, DE, ES, FR, IT (auto-detected)
-- Max tokens: 4000 per response
+- Language support: DE, EN, ES, FR, IT (response language, NOT search filter)
+- Deep research model has lower rate limits than pro
 
 ### Dependencies
 - Python 3.8+
-- `perplexity-python` package
+- `openai` package (Perplexity uses OpenAI-compatible API)
+- `mcp` package (FastMCP)
 - Valid API key in `.env`
 - MCP server configuration in `.mcp.json`
 
 ### Validation
-- Test with: "Search for 'test' using Perplexity"
+- Test with: `perplexity_pro(query="test")`
 - Should return search results with sources
 - Check API credits at Perplexity dashboard
 
 ### Documentation
 - Setup: `docs/QUICKSTART.md`
-- Examples: `docs/OUTPUT_EXAMPLES.md`
-- API docs: https://docs.perplexity.ai/
+- API Reference: `docs/guides/PERPLEXITY_API_REFERENCE.md`
+- Official docs: https://docs.perplexity.ai/
 
 ---
 
 ## IDE MCP Server (Built-in)
 
-**Status:** ✅ Active (Built into Claude Code)
+**Status:** Active (Built into Claude Code)
 **No configuration required**
 
 ### Available Tools
@@ -133,50 +217,10 @@ Deep research with web crawling, social media search, and real-time data from Pe
 When installing a new MCP server:
 
 1. **Install the server**
-   ```bash
-   # Follow server-specific installation instructions
-   ```
-
 2. **Configure in `.mcp.json`**
-   ```json
-   {
-     "mcpServers": {
-       "server-name": {
-         "command": "...",
-         "args": [...],
-         "env": {...}
-       }
-     }
-   }
-   ```
-
 3. **Document in this file**
-   - Add new section with server name
-   - List all available tools
-   - Document parameters and returns
-   - Add examples and limitations
-   - Note dependencies and validation steps
-
-4. **Fetch and mirror spec (if available)**
-   - Check for official MCP protocol spec
-   - Mirror to `docs/MCP_PROTOCOL_SPEC.md` or similar
-   - Document version and source URL
-
-5. **Commit and version control**
-   ```bash
-   git add docs/tools/mcp-servers.md
-   git commit -m "docs: add [server-name] MCP server documentation"
-   ```
-
----
-
-## Best Practices
-
-1. **Test before documenting** - Verify all tools work before adding to this manifest
-2. **Include costs** - Document any API costs or rate limits
-3. **Provide examples** - Show real-world usage for each tool
-4. **Update regularly** - When tools change, update documentation immediately
-5. **Cross-reference** - Link to detailed docs in main project documentation
+4. **Test all tools**
+5. **Commit changes**
 
 ---
 
