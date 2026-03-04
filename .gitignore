@@ -40,3 +40,14 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+nul
+
+# Local config (machine-specific paths)
+.mcp.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Generated reports
+docs/reports/
+reports/
