@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-03-04 - Housekeeping: .gitignore for Local Files
+
+### Maintenance
+
+Added local/generated files to `.gitignore` to keep the repo clean:
+- `.mcp.json` — machine-specific paths (macOS vs Windows), should not be tracked
+- `.claude/settings.local.json` — local Claude Code settings
+- `docs/reports/`, `reports/` — generated research output
+- `nul` — Windows artifact
+
+**Files Changed:**
+| File | Action |
+|------|--------|
+| `.gitignore` | Updated with local/generated file patterns |
+
+---
+
 ## 2025-12-11 - Unified Perplexity MCP (2 Tools, Maximum Quality)
 
 ### Major Refactor: Consolidated 3 Tools → 2 Tools
